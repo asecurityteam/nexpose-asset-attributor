@@ -4,6 +4,9 @@ import (
 	"context"
 	"os"
 
+	"github.com/asecurityteam/nexpose-asset-attributor/pkg/assetattributor"
+	"github.com/asecurityteam/runhttp"
+
 	"github.com/asecurityteam/nexpose-asset-attributor/pkg/handlers/v1"
 	serverfull "github.com/asecurityteam/serverfull/pkg"
 	serverfulldomain "github.com/asecurityteam/serverfull/pkg/domain"
@@ -13,9 +16,13 @@ import (
 
 func main() {
 	ctx := context.Background()
-	greetingHandler := &v1.GreetingHandler{}
+	attributeHandler := &v1.AttributeHandler{
+		AssetAttributor: assetattributor.NewNoOpAssetAttributor(),
+		LogFn:           runhttp.LoggerFromContext,
+		StatFn:          runhttp.StatFromContext,
+	}
 	handlers := map[string]serverfulldomain.Handler{
-		"hello": lambda.NewHandler(greetingHandler.Handle),
+		"attribute": lambda.NewHandler(attributeHandler.Handle),
 	}
 
 	source, err := settings.NewEnvSource(os.Environ())
