@@ -22,19 +22,18 @@ func (h *AttributeHandler) Handle(ctx context.Context, assetVulns domain.Nexpose
 	logger := h.LogFn(ctx)
 	stater := h.StatFn(ctx)
 
-	attributor := assetattributor.NewNoOpAssetAttributor()
-	attributedAssetVulns, err := attributor.Attribute(assetVulns)
+	attributedAssetVulns, err := h.AssetAttributor.Attribute(ctx, assetVulns)
 	if err != nil {
-		if _, ok := err.(assetattributor.AssetNotFoundError); ok {
-			logger.Error(logs.AssetNotFoundError{Reason: err.Error()})
+		if notFoundError, ok := err.(*assetattributor.AssetNotFoundError); ok {
+			logger.Error(logs.AssetNotFoundError{Reason: notFoundError.Error()})
 			stater.Count("event.nexposeassetattributor.attribution_failure.asset_not_found", 1)
-			return domain.NexposeAttributedAssetVulnerabilities{}, err
+			return domain.NexposeAttributedAssetVulnerabilities{}, notFoundError
 		}
 
-		if _, ok := err.(assetattributor.AssetInventoryRequestError); ok {
-			logger.Error(logs.AssetInventoryRequestError{Reason: err.Error()})
+		if requestFailedError, ok := err.(*assetattributor.AssetInventoryRequestError); ok {
+			logger.Error(logs.AssetInventoryRequestError{Reason: requestFailedError.Error()})
 			stater.Count("event.nexposeassetattributor.attribution_failure.asset_inventory_request_error", 1)
-			return domain.NexposeAttributedAssetVulnerabilities{}, err
+			return domain.NexposeAttributedAssetVulnerabilities{}, requestFailedError
 		}
 	}
 	return attributedAssetVulns, nil

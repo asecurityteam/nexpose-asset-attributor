@@ -1,6 +1,10 @@
 package assetattributor
 
-import "github.com/asecurityteam/nexpose-asset-attributor/pkg/domain"
+import (
+	"context"
+
+	"github.com/asecurityteam/nexpose-asset-attributor/pkg/domain"
+)
 
 // NoOpAssetAttributor is an implementation of AssetAttributor that queries no
 // asset inventory systems, but instead returns a zero-value domain.CloudAssetDetails for
@@ -14,7 +18,7 @@ func NewNoOpAssetAttributor() *NoOpAssetAttributor {
 
 // Attribute returns a zero-value domain.CloudAssetDetails for the scan-time business context
 // of the given domain.NexposeAssetVulnerabilities instance
-func (n *NoOpAssetAttributor) Attribute(asset domain.NexposeAssetVulnerabilities) (domain.NexposeAttributedAssetVulnerabilities, error) {
+func (n *NoOpAssetAttributor) Attribute(ctx context.Context, asset domain.NexposeAssetVulnerabilities) (domain.NexposeAttributedAssetVulnerabilities, error) {
 	return domain.NexposeAttributedAssetVulnerabilities{
 		Asset:           asset.Asset,
 		Vulnerabilities: asset.Vulnerabilities,
