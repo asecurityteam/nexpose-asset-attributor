@@ -3,7 +3,7 @@ package assetattributor
 import "fmt"
 
 // AssetNotFoundError occurs when a request to an asset inventory system
-// returns a success response, but with no results for a given asset
+// returns either a 404 Not Found response, or a 200 OK response with no results
 type AssetNotFoundError struct {
 	Inner          error
 	AssetID        string
@@ -18,7 +18,7 @@ func (err AssetNotFoundError) Error() string {
 }
 
 // AssetInventoryRequestError occurs when a request to an asset inventory system
-// returns a failure respons
+// returns a 5XX failure response
 type AssetInventoryRequestError struct {
 	Inner          error
 	AssetID        string
