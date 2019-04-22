@@ -13,7 +13,6 @@ import (
 	"github.com/asecurityteam/nexpose-asset-attributor/pkg/assetattributor"
 	"github.com/asecurityteam/nexpose-asset-attributor/pkg/domain"
 	"github.com/asecurityteam/nexpose-asset-attributor/pkg/nexpose"
-	"github.com/asecurityteam/runhttp"
 )
 
 func TestSuccess(t *testing.T) {
@@ -25,8 +24,8 @@ func TestSuccess(t *testing.T) {
 
 	handler := &AttributeHandler{
 		AssetAttributor: assetattributor.NewNoOpAssetAttributor(),
-		LogFn:           runhttp.LoggerFromContext,
-		StatFn:          runhttp.StatFromContext,
+		LogFn:           domain.LoggerFromContext,
+		StatFn:          domain.StatFromContext,
 	}
 	ctx := logevent.NewContext(context.Background(), logevent.New(logevent.Config{Output: ioutil.Discard}))
 	_, err := handler.Handle(ctx, input)
@@ -49,8 +48,8 @@ func TestAssetNotFoundError(t *testing.T) {
 
 	handler := &AttributeHandler{
 		AssetAttributor: mockAttributor,
-		LogFn:           runhttp.LoggerFromContext,
-		StatFn:          runhttp.StatFromContext,
+		LogFn:           domain.LoggerFromContext,
+		StatFn:          domain.StatFromContext,
 	}
 	ctx := logevent.NewContext(context.Background(), logevent.New(logevent.Config{Output: ioutil.Discard}))
 	_, err := handler.Handle(ctx, input)
@@ -76,8 +75,8 @@ func TestAssetInventoryRequestError(t *testing.T) {
 
 	handler := &AttributeHandler{
 		AssetAttributor: mockAttributor,
-		LogFn:           runhttp.LoggerFromContext,
-		StatFn:          runhttp.StatFromContext,
+		LogFn:           domain.LoggerFromContext,
+		StatFn:          domain.StatFromContext,
 	}
 	ctx := logevent.NewContext(context.Background(), logevent.New(logevent.Config{Output: ioutil.Discard}))
 	_, err := handler.Handle(ctx, input)
@@ -99,8 +98,8 @@ func TestUnexpectedAttributionFailure(t *testing.T) {
 
 	handler := &AttributeHandler{
 		AssetAttributor: mockAttributor,
-		LogFn:           runhttp.LoggerFromContext,
-		StatFn:          runhttp.StatFromContext,
+		LogFn:           domain.LoggerFromContext,
+		StatFn:          domain.StatFromContext,
 	}
 	ctx := logevent.NewContext(context.Background(), logevent.New(logevent.Config{Output: ioutil.Discard}))
 	_, err := handler.Handle(ctx, input)
