@@ -20,22 +20,18 @@ type AttributeHandler struct {
 // at Nexpose scan time.
 func (h *AttributeHandler) Handle(ctx context.Context, assetVulns domain.NexposeAssetVulnerabilities) (domain.NexposeAttributedAssetVulnerabilities, error) {
 	logger := h.LogFn(ctx)
-	stater := h.StatFn(ctx)
 
 	attributedAssetVulns, err := h.AssetAttributor.Attribute(ctx, assetVulns)
 	if err != nil {
 		switch err.(type) {
 		case *assetattributor.AssetNotFoundError:
 			logger.Error(logs.AssetNotFoundError{Reason: err.Error()})
-			stater.Count("event.nexposeassetattributor.attribution_failure.asset_not_found", 1)
 			return domain.NexposeAttributedAssetVulnerabilities{}, err
 		case *assetattributor.AssetInventoryRequestError:
 			logger.Error(logs.AssetInventoryRequestError{Reason: err.Error()})
-			stater.Count("event.nexposeassetattributor.attribution_failure.asset_inventory_request_error", 1)
 			return domain.NexposeAttributedAssetVulnerabilities{}, err
 		default:
 			logger.Error(logs.UnknownAttributionFailureError{Reason: err.Error()})
-			stater.Count("event.nexposeassetattributor.attribution_failure.unknown_attribution_failure", 1)
 			return domain.NexposeAttributedAssetVulnerabilities{}, err
 		}
 	}
