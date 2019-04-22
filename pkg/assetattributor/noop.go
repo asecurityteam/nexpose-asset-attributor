@@ -22,6 +22,11 @@ func (n *NoOpAssetAttributor) Attribute(ctx context.Context, asset domain.Nexpos
 	return domain.NexposeAttributedAssetVulnerabilities{
 		Asset:           asset.Asset,
 		Vulnerabilities: asset.Vulnerabilities,
-		BusinessContext: domain.CloudAssetDetails{},
+		BusinessContext: domain.CloudAssetDetails{
+			PrivateIPAddresses: make([]string, 0),
+			PublicIPAddresses:  make([]string, 0),
+			Hostnames:          make([]string, 0),
+			Tags:               make(map[string]string),
+		},
 	}, nil
 }

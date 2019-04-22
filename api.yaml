@@ -69,6 +69,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/AssetWithVulnerabilitiesAndBusinessContext'
+        "400":
+            description: "Invalid input"
+            content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/Error'
       x-transportd:
         backend: app
         enabled:
@@ -85,6 +91,18 @@ paths:
           error: '{"status": 500, "bodyPassthrough": true}'
 components:
   schemas:
+    Error:
+      type: object
+      properties:
+        status:
+          type: string
+          description: HTTP status message
+        code:
+          type: integer
+          description: HTTP status code
+        reason:
+          type: string
+          description: Detailed information about the error
     AssetWithVulnerabilities:
       type: object
       properties:
