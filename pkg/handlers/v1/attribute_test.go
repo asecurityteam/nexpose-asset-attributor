@@ -12,12 +12,11 @@ import (
 	"github.com/asecurityteam/logevent"
 	"github.com/asecurityteam/nexpose-asset-attributor/pkg/assetattributor"
 	"github.com/asecurityteam/nexpose-asset-attributor/pkg/domain"
-	"github.com/asecurityteam/nexpose-asset-attributor/pkg/nexpose"
 )
 
 func TestSuccess(t *testing.T) {
 	input := domain.NexposeAssetVulnerabilities{
-		Asset: nexpose.Asset{
+		Asset: domain.Asset{
 			ID: 123,
 		},
 	}
@@ -43,7 +42,7 @@ func TestAssetNotFoundError(t *testing.T) {
 		})
 
 	input := domain.NexposeAssetVulnerabilities{
-		Asset: nexpose.Asset{ID: 123},
+		Asset: domain.Asset{ID: 123},
 	}
 
 	handler := &AttributeHandler{
@@ -68,7 +67,7 @@ func TestAssetInventoryRequestError(t *testing.T) {
 		})
 
 	input := domain.NexposeAssetVulnerabilities{
-		Asset: nexpose.Asset{
+		Asset: domain.Asset{
 			ID: 123,
 		},
 	}
@@ -91,7 +90,7 @@ func TestUnexpectedAttributionFailure(t *testing.T) {
 		domain.NexposeAttributedAssetVulnerabilities{}, errors.New("oh noes"))
 
 	input := domain.NexposeAssetVulnerabilities{
-		Asset: nexpose.Asset{
+		Asset: domain.Asset{
 			ID: 123,
 		},
 	}

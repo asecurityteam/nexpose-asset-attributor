@@ -1,4 +1,4 @@
-package nexpose
+package domain
 
 // Configuration represents a name-value pair
 type Configuration struct {

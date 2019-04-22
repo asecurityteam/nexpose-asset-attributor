@@ -1,4 +1,4 @@
-package nexpose
+package domain
 
 // Link represents a hyperlink and relation
 type Link struct {

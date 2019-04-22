@@ -1,4 +1,4 @@
-package nexpose
+package domain
 
 import (
 	"os"

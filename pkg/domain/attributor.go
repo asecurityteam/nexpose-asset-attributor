@@ -2,8 +2,6 @@ package domain
 
 import (
 	"context"
-
-	"github.com/asecurityteam/nexpose-asset-attributor/pkg/nexpose"
 )
 
 // AssetAttributor receives a NexposeAssetVulnerabilities instance, queries one
@@ -16,8 +14,8 @@ type AssetAttributor interface {
 // NexposeAssetVulnerabilities is a Nexpose asset response payload appended
 // with assetVulnerabilityDetails
 type NexposeAssetVulnerabilities struct {
-	nexpose.Asset
-	Vulnerabilities []nexpose.AssetVulnerabilityDetails `json:"assetVulnerabilityDetails"`
+	Asset
+	Vulnerabilities []AssetVulnerabilityDetails `json:"assetVulnerabilityDetails"`
 }
 
 // CloudAssetDetails represent an asset and associated metadata
@@ -35,7 +33,7 @@ type CloudAssetDetails struct {
 // NexposeAttributedAssetVulnerabilities is a NexposeAssetVulnerabilities instance combined
 // with the business context pertaining to the asset at scan time.
 type NexposeAttributedAssetVulnerabilities struct {
-	nexpose.Asset   `json:"asset"`
-	Vulnerabilities []nexpose.AssetVulnerabilityDetails `json:"assetVulnerabilityDetails"`
-	BusinessContext CloudAssetDetails                   `json:"businessContext"`
+	Asset           `json:"asset"`
+	Vulnerabilities []AssetVulnerabilityDetails `json:"assetVulnerabilityDetails"`
+	BusinessContext CloudAssetDetails           `json:"businessContext"`
 }
