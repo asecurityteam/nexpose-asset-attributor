@@ -88,11 +88,24 @@ paths:
           async: false
           request: '#! json .Request.Body !#'
           success: '{"status": 200, "bodyPassthrough": true}'
-          error: '{"status":
-            #! if eq .Response.Body.errorType "AssetNotFoundError" !# 404
-            #! else if eq .Response.Body.errorType "AssetInventoryRequestError" !# 502
-            #! else !# 500
-            #! end !#, "bodyPassthrough": true}'
+          error: >
+            {
+              "status":
+              #! if eq .Response.Body.errorType "AssetNotFoundError" !# 404,
+              #! else if eq .Response.Body.errorType "AssetInventoryRequestError" !# 502,
+              #! else !# 500,
+              #! end !#
+              "body": {
+                #! if eq .Response.Body.errorType "AssetNotFoundError" !#
+                "code": 404, "status": "Not Found",
+                #! else if eq .Response.Body.errorType "AssetInventoryRequestError" !#
+                "code": 502, "status": "Bad Gateway",
+                #! else !#
+                "code": 500, "status": "Internal Server Error",
+                #! end !#
+                "reason": "#!.Response.Body.errorMessage!#"
+              }
+            }
 components:
   schemas:
     Error:
