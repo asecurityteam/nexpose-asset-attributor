@@ -88,7 +88,11 @@ paths:
           async: false
           request: '#! json .Request.Body !#'
           success: '{"status": 200, "bodyPassthrough": true}'
-          error: '{"status": 500, "bodyPassthrough": true}'
+          error: '{"status":
+            #! if eq .Response.Body.errorType "AssetNotFoundError" !# 404
+            #! else if eq .Response.Body.errorType "AssetInventoryRequestError" !# 502
+            #! else !# 500
+            #! end !#, "bodyPassthrough": true}'
 components:
   schemas:
     Error:

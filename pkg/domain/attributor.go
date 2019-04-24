@@ -33,7 +33,7 @@ type CloudAssetDetails struct {
 // NexposeAttributedAssetVulnerabilities is a NexposeAssetVulnerabilities instance combined
 // with the business context pertaining to the asset at scan time.
 type NexposeAttributedAssetVulnerabilities struct {
-	Asset           `json:"asset"`
+	Asset
 	Vulnerabilities []AssetVulnerabilityDetails `json:"assetVulnerabilityDetails"`
 	BusinessContext CloudAssetDetails           `json:"businessContext"`
 }

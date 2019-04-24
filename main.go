@@ -4,14 +4,14 @@ import (
 	"context"
 	"os"
 
-	"github.com/asecurityteam/nexpose-asset-attributor/pkg/assetattributor"
-	"github.com/asecurityteam/runhttp"
+	"github.com/aws/aws-lambda-go/lambda"
 
+	"github.com/asecurityteam/nexpose-asset-attributor/pkg/assetattributor"
 	"github.com/asecurityteam/nexpose-asset-attributor/pkg/handlers/v1"
+	"github.com/asecurityteam/runhttp"
 	serverfull "github.com/asecurityteam/serverfull/pkg"
 	serverfulldomain "github.com/asecurityteam/serverfull/pkg/domain"
 	"github.com/asecurityteam/settings"
-	"github.com/aws/aws-lambda-go/lambda"
 )
 
 func main() {
