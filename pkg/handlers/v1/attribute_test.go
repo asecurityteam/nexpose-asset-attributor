@@ -12,7 +12,12 @@ import (
 	"github.com/asecurityteam/logevent"
 	"github.com/asecurityteam/nexpose-asset-attributor/pkg/assetattributor"
 	"github.com/asecurityteam/nexpose-asset-attributor/pkg/domain"
+	"github.com/asecurityteam/runhttp"
 )
+
+func newNoOpLogger(_ context.Context) runhttp.Logger {
+	return logevent.New(logevent.Config{Output: ioutil.Discard})
+}
 
 func TestSuccess(t *testing.T) {
 	input := domain.NexposeAssetVulnerabilities{
@@ -23,11 +28,10 @@ func TestSuccess(t *testing.T) {
 
 	handler := &AttributeHandler{
 		AssetAttributor: assetattributor.NewNoOpAssetAttributor(),
-		LogFn:           domain.LoggerFromContext,
+		LogFn:           newNoOpLogger,
 		StatFn:          domain.StatFromContext,
 	}
-	ctx := logevent.NewContext(context.Background(), logevent.New(logevent.Config{Output: ioutil.Discard}))
-	_, err := handler.Handle(ctx, input)
+	_, err := handler.Handle(context.Background(), input)
 	assert.Nil(t, err, "Got unexpected Error: *v", err)
 }
 
@@ -47,11 +51,10 @@ func TestAssetNotFoundError(t *testing.T) {
 
 	handler := &AttributeHandler{
 		AssetAttributor: mockAttributor,
-		LogFn:           domain.LoggerFromContext,
+		LogFn:           newNoOpLogger,
 		StatFn:          domain.StatFromContext,
 	}
-	ctx := logevent.NewContext(context.Background(), logevent.New(logevent.Config{Output: ioutil.Discard}))
-	_, err := handler.Handle(ctx, input)
+	_, err := handler.Handle(context.Background(), input)
 	assert.IsType(t, &assetattributor.AssetNotFoundError{}, err)
 }
 
@@ -74,11 +77,10 @@ func TestAssetInventoryRequestError(t *testing.T) {
 
 	handler := &AttributeHandler{
 		AssetAttributor: mockAttributor,
-		LogFn:           domain.LoggerFromContext,
+		LogFn:           newNoOpLogger,
 		StatFn:          domain.StatFromContext,
 	}
-	ctx := logevent.NewContext(context.Background(), logevent.New(logevent.Config{Output: ioutil.Discard}))
-	_, err := handler.Handle(ctx, input)
+	_, err := handler.Handle(context.Background(), input)
 	assert.IsType(t, &assetattributor.AssetInventoryRequestError{}, err)
 }
 
@@ -97,10 +99,9 @@ func TestUnexpectedAttributionFailure(t *testing.T) {
 
 	handler := &AttributeHandler{
 		AssetAttributor: mockAttributor,
-		LogFn:           domain.LoggerFromContext,
+		LogFn:           newNoOpLogger,
 		StatFn:          domain.StatFromContext,
 	}
-	ctx := logevent.NewContext(context.Background(), logevent.New(logevent.Config{Output: ioutil.Discard}))
-	_, err := handler.Handle(ctx, input)
+	_, err := handler.Handle(context.Background(), input)
 	assert.NotNil(t, err)
 }
