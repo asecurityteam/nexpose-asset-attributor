@@ -4,18 +4,25 @@ import (
 	"context"
 	"os"
 
+	"github.com/aws/aws-lambda-go/lambda"
+
+	"github.com/asecurityteam/nexpose-asset-attributor/pkg/assetattributor"
+	"github.com/asecurityteam/nexpose-asset-attributor/pkg/domain"
 	"github.com/asecurityteam/nexpose-asset-attributor/pkg/handlers/v1"
 	serverfull "github.com/asecurityteam/serverfull/pkg"
 	serverfulldomain "github.com/asecurityteam/serverfull/pkg/domain"
 	"github.com/asecurityteam/settings"
-	"github.com/aws/aws-lambda-go/lambda"
 )
 
 func main() {
 	ctx := context.Background()
-	greetingHandler := &v1.GreetingHandler{}
+	attributeHandler := &v1.AttributeHandler{
+		AssetAttributor: assetattributor.NewNoOpAssetAttributor(),
+		LogFn:           domain.LoggerFromContext,
+		StatFn:          domain.StatFromContext,
+	}
 	handlers := map[string]serverfulldomain.Handler{
-		"hello": lambda.NewHandler(greetingHandler.Handle),
+		"attribute": lambda.NewHandler(attributeHandler.Handle),
 	}
 
 	source, err := settings.NewEnvSource(os.Environ())
