@@ -2,11 +2,8 @@ package domain
 
 import (
 	"context"
-<<<<<<< HEAD
 	"time"
-=======
 	"fmt"
->>>>>>> Move attribution errors to domain package
 )
 
 // AssetAttributor receives a NexposeAssetVulnerabilities instance, queries one
