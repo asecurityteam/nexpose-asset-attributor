@@ -3,7 +3,6 @@ package v1
 import (
 	"context"
 
-	"github.com/asecurityteam/nexpose-asset-attributor/pkg/assetattributor"
 	"github.com/asecurityteam/nexpose-asset-attributor/pkg/domain"
 	"github.com/asecurityteam/nexpose-asset-attributor/pkg/logs"
 )
@@ -24,11 +23,14 @@ func (h *AttributeHandler) Handle(ctx context.Context, assetVulns domain.Nexpose
 	attributedAssetVulns, err := h.AssetAttributor.Attribute(ctx, assetVulns)
 	if err != nil {
 		switch err.(type) {
-		case *assetattributor.AssetNotFoundError:
+		case domain.AssetNotFoundError:
 			logger.Error(logs.AssetNotFoundError{Reason: err.Error()})
 			return domain.NexposeAttributedAssetVulnerabilities{}, err
-		case *assetattributor.AssetInventoryRequestError:
+		case domain.AssetInventoryRequestError:
 			logger.Error(logs.AssetInventoryRequestError{Reason: err.Error()})
+			return domain.NexposeAttributedAssetVulnerabilities{}, err
+		case domain.AssetInventoryMultipleAssetsFoundError:
+			logger.Error(logs.AssetInventoryMultipleAssetsFoundError{Reason: err.Error()})
 			return domain.NexposeAttributedAssetVulnerabilities{}, err
 		default:
 			logger.Error(logs.UnknownAttributionFailureError{Reason: err.Error()})
