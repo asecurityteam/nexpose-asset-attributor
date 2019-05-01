@@ -20,8 +20,7 @@ func NewNoOpAssetAttributor() *NoOpAssetAttributor {
 // of the given domain.NexposeAssetVulnerabilities instance
 func (n *NoOpAssetAttributor) Attribute(ctx context.Context, asset domain.NexposeAssetVulnerabilities) (domain.NexposeAttributedAssetVulnerabilities, error) {
 	return domain.NexposeAttributedAssetVulnerabilities{
-		Asset:           asset.Asset,
-		Vulnerabilities: asset.Vulnerabilities,
+		NexposeAssetVulnerabilities: asset,
 		BusinessContext: domain.CloudAssetDetails{
 			PrivateIPAddresses: make([]string, 0),
 			PublicIPAddresses:  make([]string, 0),

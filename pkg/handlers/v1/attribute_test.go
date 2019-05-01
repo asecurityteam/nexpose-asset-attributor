@@ -14,9 +14,7 @@ import (
 
 func TestSuccess(t *testing.T) {
 	input := domain.NexposeAssetVulnerabilities{
-		Asset: domain.Asset{
-			ID: 123,
-		},
+		ID: 123,
 	}
 
 	handler := &AttributeHandler{
@@ -39,7 +37,7 @@ func TestAssetNotFoundError(t *testing.T) {
 		})
 
 	input := domain.NexposeAssetVulnerabilities{
-		Asset: domain.Asset{ID: 123},
+		ID: 123,
 	}
 
 	handler := &AttributeHandler{
@@ -63,9 +61,7 @@ func TestAssetInventoryRequestError(t *testing.T) {
 		})
 
 	input := domain.NexposeAssetVulnerabilities{
-		Asset: domain.Asset{
-			ID: 123,
-		},
+		ID: 123,
 	}
 
 	handler := &AttributeHandler{
@@ -85,9 +81,7 @@ func TestUnexpectedAttributionFailure(t *testing.T) {
 		domain.NexposeAttributedAssetVulnerabilities{}, errors.New("oh noes"))
 
 	input := domain.NexposeAssetVulnerabilities{
-		Asset: domain.Asset{
-			ID: 123,
-		},
+		ID: 123,
 	}
 
 	handler := &AttributeHandler{
