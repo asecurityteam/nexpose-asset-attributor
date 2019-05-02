@@ -8,7 +8,7 @@ import (
 
 	"github.com/asecurityteam/nexpose-asset-attributor/pkg/assetattributor"
 	"github.com/asecurityteam/nexpose-asset-attributor/pkg/domain"
-	"github.com/asecurityteam/nexpose-asset-attributor/pkg/handlers/v1"
+	v1 "github.com/asecurityteam/nexpose-asset-attributor/pkg/handlers/v1"
 	serverfull "github.com/asecurityteam/serverfull/pkg"
 	serverfulldomain "github.com/asecurityteam/serverfull/pkg/domain"
 	"github.com/asecurityteam/settings"
