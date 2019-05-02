@@ -8,13 +8,13 @@ import (
 	"net/http"
 	"net/url"
 	"path"
+	"sync"
 	"time"
 
 	"github.com/asecurityteam/nexpose-asset-attributor/pkg/domain"
 )
 
 const (
-	assetHistoryTypeScan        = "SCAN"
 	assetInventoryAPIIdentifier = "asset-inventory-api"
 	timeQueryParam              = "time"
 	resourcePathTypeIP          = "ip"
@@ -36,90 +36,100 @@ type AssetInventoryAPIAttributor struct {
 // Attribute queries the asecurityteam/asset-inventory-api service first by IP, then by hostname
 // if the first query returns no results
 func (n *AssetInventoryAPIAttributor) Attribute(ctx context.Context, asset domain.NexposeAssetVulnerabilities) (domain.NexposeAttributedAssetVulnerabilities, error) {
-	ts, err := extractTimestamp(asset.History)
-	if err != nil {
-		return domain.NexposeAttributedAssetVulnerabilities{}, err
+	if asset.LastScanned.IsZero() {
+		return domain.NexposeAttributedAssetVulnerabilities{}, fmt.Errorf("no valid timestamp in scan history")
 	}
 
-	if asset.IP == "" && asset.HostName == "" {
+	if asset.IP == "" && asset.Hostname == "" {
 		return domain.NexposeAttributedAssetVulnerabilities{}, domain.AssetNotFoundError{
 			Inner:          fmt.Errorf("asset has no IP or hostname"),
 			AssetID:        fmt.Sprintf("%d", asset.ID),
-			ScanTimestamp:  ts.Format(time.RFC3339Nano),
+			ScanTimestamp:  asset.LastScanned.Format(time.RFC3339Nano),
 			AssetInventory: assetInventoryAPIIdentifier,
 		}
 	}
 
-	outerErrs := []error{}
+	// Since asset-inventory-api has APIs for asset lookup by both IP and hostname, make concurrent
+	// calls to asset-inventory-api's APIs for asset lookup by IP and hostname, wait for the calls
+	// to complete, and aggregrate the responses and errors onto buffered channels.
+	assetDetailsChan := make(chan domain.CloudAssetDetails, 2)
+	errChan := make(chan error, 2)
+	wg := &sync.WaitGroup{}
 
-	// first query asset-inventory-api by IP if possible
 	if asset.IP != "" {
-		assetDetails, e := n.fetchAsset(ctx, resourcePathTypeIP, asset.IP, ts)
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			assetDetails, err := n.fetchAsset(ctx, resourcePathTypeIP, asset.IP, asset.LastScanned)
+			if err != nil {
+				errChan <- err
+				return
+			}
+			assetDetailsChan <- assetDetails[0]
+		}()
+	}
+
+	if asset.Hostname != "" {
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			assetDetails, err := n.fetchAsset(ctx, resourcePathTypeHostname, asset.Hostname, asset.LastScanned)
+			if err != nil {
+				errChan <- err
+				return
+			}
+			assetDetailsChan <- assetDetails[0]
+		}()
+	}
+	wg.Wait()
+
+	// Once all goroutines have completed and all errors received, close the error channel and
+	// range over the buffered output, exiting on any fatal errors.
+	close(errChan)
+	outerErrs := []error{}
+	for e := range errChan {
 		switch e.(type) {
-		case nil:
-			return domain.NexposeAttributedAssetVulnerabilities{
-				Asset:           asset.Asset,
-				Vulnerabilities: asset.Vulnerabilities,
-				BusinessContext: assetDetails[0],
-			}, nil
 		case httpMultipleAssetsFoundError:
 			return domain.NexposeAttributedAssetVulnerabilities{}, domain.AssetInventoryMultipleAssetsFoundError{
 				Inner:          e,
 				AssetID:        fmt.Sprintf("%d", asset.ID),
-				ScanTimestamp:  ts.Format(time.RFC3339Nano),
+				ScanTimestamp:  asset.LastScanned.Format(time.RFC3339Nano),
 				AssetInventory: assetInventoryAPIIdentifier,
 			}
 		case httpBadRequest:
 			return domain.NexposeAttributedAssetVulnerabilities{}, domain.AssetInventoryRequestError{
 				Inner:          e,
 				AssetID:        fmt.Sprintf("%d", asset.ID),
-				ScanTimestamp:  ts.Format(time.RFC3339Nano),
+				ScanTimestamp:  asset.LastScanned.Format(time.RFC3339Nano),
 				AssetInventory: assetInventoryAPIIdentifier,
 				Code:           http.StatusBadRequest,
 			}
-		default:
-			outerErrs = append(outerErrs, e)
+		}
+		outerErrs = append(outerErrs, e)
+	}
+
+	// Exit with an AssetNotFoundError error if both API calls returned non-fatal errors.
+	if len(outerErrs) == 2 {
+		return domain.NexposeAttributedAssetVulnerabilities{}, domain.AssetNotFoundError{
+			Inner:          combinedError{Errors: outerErrs},
+			AssetID:        fmt.Sprintf("%d", asset.ID),
+			ScanTimestamp:  asset.LastScanned.Format(time.RFC3339Nano),
+			AssetInventory: assetInventoryAPIIdentifier,
 		}
 	}
 
-	// query asset-inventory-api by hostname if IP is not available or returns no results
-	if asset.HostName != "" {
-		assetDetails, e := n.fetchAsset(ctx, resourcePathTypeHostname, asset.HostName, ts)
-		switch e.(type) {
-		case nil:
-			return domain.NexposeAttributedAssetVulnerabilities{
-				Asset:           asset.Asset,
-				Vulnerabilities: asset.Vulnerabilities,
-				BusinessContext: assetDetails[0],
-			}, nil
-		case httpMultipleAssetsFoundError:
-			return domain.NexposeAttributedAssetVulnerabilities{}, domain.AssetInventoryMultipleAssetsFoundError{
-				Inner:          e,
-				AssetID:        fmt.Sprintf("%d", asset.ID),
-				ScanTimestamp:  ts.Format(time.RFC3339Nano),
-				AssetInventory: assetInventoryAPIIdentifier,
-			}
-		case httpBadRequest:
-			return domain.NexposeAttributedAssetVulnerabilities{}, domain.AssetInventoryRequestError{
-				Inner:          e,
-				AssetID:        fmt.Sprintf("%d", asset.ID),
-				ScanTimestamp:  ts.Format(time.RFC3339Nano),
-				AssetInventory: assetInventoryAPIIdentifier,
-				Code:           http.StatusBadRequest,
-			}
-		default:
-			outerErrs = append(outerErrs, e)
-		}
+	// Close the assetDetailsChan channel and append the buffered output to a slice.
+	close(assetDetailsChan)
+	assetDetails := []domain.CloudAssetDetails{}
+	for assetDetail := range assetDetailsChan {
+		assetDetails = append(assetDetails, assetDetail)
 	}
 
-	// combine any errors from the individual calls to asset-inventory-api and
-	// return an AssetNotFoundError
-	return domain.NexposeAttributedAssetVulnerabilities{}, domain.AssetNotFoundError{
-		Inner:          combinedError{Errors: outerErrs},
-		AssetID:        fmt.Sprintf("%d", asset.ID),
-		ScanTimestamp:  ts.Format(time.RFC3339Nano),
-		AssetInventory: assetInventoryAPIIdentifier,
-	}
+	// Return the attributed asset with the first assetDetails returned by asset-inventory-api
+	return domain.NexposeAttributedAssetVulnerabilities{
+		NexposeAssetVulnerabilities: asset,
+		BusinessContext:             assetDetails[0],
+	}, nil
 }
 
 func (n *AssetInventoryAPIAttributor) fetchAsset(ctx context.Context, idType string, id string, ts time.Time) ([]domain.CloudAssetDetails, error) {
@@ -172,23 +182,4 @@ func (n *AssetInventoryAPIAttributor) fetchAsset(ctx context.Context, idType str
 	}
 
 	return assetDetails.Response, nil
-}
-
-func extractTimestamp(history []domain.AssetHistory) (time.Time, error) {
-	latestTime := time.Time{}
-	for _, evt := range history {
-		if evt.Type == assetHistoryTypeScan {
-			t, err := time.Parse(time.RFC3339, evt.Date)
-			if err != nil {
-				return latestTime, err
-			}
-			if t.After(latestTime) {
-				latestTime = t
-			}
-		}
-	}
-	if latestTime.IsZero() {
-		return time.Time{}, fmt.Errorf("no valid timestamp in scan history")
-	}
-	return latestTime, nil
 }

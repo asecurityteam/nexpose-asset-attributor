@@ -2,8 +2,8 @@ package domain
 
 import (
 	"context"
-	"time"
 	"fmt"
+	"time"
 )
 
 // AssetAttributor receives a NexposeAssetVulnerabilities instance, queries one

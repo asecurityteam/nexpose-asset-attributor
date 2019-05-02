@@ -22,12 +22,11 @@ func main() {
 		panic(err.Error())
 	}
 	assetInventoryAPIAttributorComponent := &assetattributor.AssetInventoryAPIAttributorComponent{}
-	assetInventoryAPIAttributor := &assetattributor.AssetInventoryAPIAttributor{
-		Client: http.DefaultClient,
-	}
+	assetInventoryAPIAttributor := new(assetattributor.AssetInventoryAPIAttributor)
 	if err = settings.NewComponent(ctx, source, assetInventoryAPIAttributorComponent, assetInventoryAPIAttributor); err != nil {
 		panic(err.Error())
 	}
+	assetInventoryAPIAttributor.Client = http.DefaultClient
 
 	attributeHandler := &v1.AttributeHandler{
 		AssetAttributor: assetInventoryAPIAttributor,

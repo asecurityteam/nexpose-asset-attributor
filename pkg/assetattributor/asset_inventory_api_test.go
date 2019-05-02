@@ -13,12 +13,12 @@ import (
 	"github.com/golang/mock/gomock"
 
 	"github.com/asecurityteam/nexpose-asset-attributor/pkg/domain"
-	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
 var testIP = "1.2.3.4"
 var testHostname = "hostname"
+var testTimestamp = time.Date(2019, time.April, 22, 15, 2, 44, 0, time.UTC)
 var errReason = ""
 
 func TestAssetInventoryAPIAttributorAttribute(t *testing.T) {
@@ -32,171 +32,107 @@ func TestAssetInventoryAPIAttributorAttribute(t *testing.T) {
 		CloudAssetPath: "/v1/cloud",
 	}
 
-	ts := time.Date(2019, time.April, 22, 15, 2, 44, 0, time.UTC)
-	testAsset := domain.NexposeAssetVulnerabilities{
-		Asset: domain.Asset{
-			ID:       1,
-			History:  []domain.AssetHistory{domain.AssetHistory{Type: "SCAN", Date: ts.Format(time.RFC3339Nano)}},
-			IP:       testIP,
-			HostName: testHostname,
-		},
+	testAssetDetails := domain.CloudAssetDetails{
+		PrivateIPAddresses: []string{testIP},
+		PublicIPAddresses:  []string{testIP},
+		Hostnames:          []string{testHostname},
+		ResourceType:       "ec2",
+		AccountID:          "1234567890",
+		ARN:                "123",
+		Region:             "us-west-2",
+		Tags:               map[string]string{"key": "value"},
 	}
 
 	tc := []struct {
 		name        string
+		asset       domain.NexposeAssetVulnerabilities
 		resps       []assetInventoryResponse
 		respCodes   []int
 		errExpected bool
 		err         error
 	}{
 		{
-			name: "fetch by IP success",
+			name: "success",
+			asset: domain.NexposeAssetVulnerabilities{
+				ID:          1,
+				LastScanned: testTimestamp,
+				IP:          testIP,
+				Hostname:    testHostname,
+			},
 			resps: []assetInventoryResponse{
 				{
 					Response: []domain.CloudAssetDetails{
-						{
-							PrivateIPAddresses: []string{testIP},
-							PublicIPAddresses:  []string{testIP},
-							Hostnames:          []string{testHostname},
-							ResourceType:       "ec2",
-							AccountID:          "1234567890",
-							ARN:                "123",
-							Region:             "us-west-2",
-							Tags:               map[string]string{"key": "value"},
-						},
+						testAssetDetails,
+					},
+				},
+				{
+					Response: []domain.CloudAssetDetails{
+						testAssetDetails,
 					},
 				},
 			},
-			respCodes:   []int{http.StatusOK},
+			respCodes:   []int{http.StatusOK, http.StatusOK},
 			errExpected: false,
 			err:         nil,
 		},
 		{
-			name: "fetch by IP returns bad request",
+			name: "bad request error",
+			asset: domain.NexposeAssetVulnerabilities{
+				ID:          1,
+				LastScanned: testTimestamp,
+				IP:          testIP,
+				Hostname:    testHostname,
+			},
 			resps: []assetInventoryResponse{
 				{},
+				{
+					Response: []domain.CloudAssetDetails{
+						testAssetDetails,
+					},
+				},
 			},
-			respCodes:   []int{http.StatusBadRequest},
+			respCodes:   []int{http.StatusBadRequest, http.StatusOK},
 			errExpected: true,
 			err:         domain.AssetInventoryRequestError{},
 		},
 		{
-			name: "fetch by IP returns multiple assets",
+			name: "multiple assets error",
+			asset: domain.NexposeAssetVulnerabilities{
+				ID:          1,
+				LastScanned: testTimestamp,
+				IP:          testIP,
+				Hostname:    testHostname,
+			},
 			resps: []assetInventoryResponse{
 				{
 					Response: []domain.CloudAssetDetails{
-						{
-							PrivateIPAddresses: []string{testIP},
-							PublicIPAddresses:  []string{testIP},
-							Hostnames:          []string{testHostname},
-							ResourceType:       "ec2",
-							AccountID:          "1234567890",
-							ARN:                "123",
-							Region:             "us-west-2",
-							Tags:               map[string]string{"key": "value"},
-						},
-						{
-							PrivateIPAddresses: []string{testIP},
-							PublicIPAddresses:  []string{testIP},
-							Hostnames:          []string{testHostname},
-							ResourceType:       "ec2",
-							AccountID:          "1234567890",
-							ARN:                "321",
-							Region:             "us-west-2",
-							Tags:               map[string]string{"key": "value"},
-						},
+						testAssetDetails,
+						testAssetDetails,
+					},
+				},
+				{
+					Response: []domain.CloudAssetDetails{
+						testAssetDetails,
 					},
 				},
 			},
-			respCodes:   []int{http.StatusOK},
+			respCodes:   []int{http.StatusOK, http.StatusOK},
 			errExpected: true,
 			err:         domain.AssetInventoryMultipleAssetsFoundError{},
 		},
 		{
-			name: "fetch by hostname success",
-			resps: []assetInventoryResponse{
-				{},
-				{
-					Response: []domain.CloudAssetDetails{
-						{
-							PrivateIPAddresses: []string{testIP},
-							PublicIPAddresses:  []string{testIP},
-							Hostnames:          []string{testHostname},
-							ResourceType:       "ec2",
-							AccountID:          "1234567890",
-							ARN:                "123",
-							Region:             "us-west-2",
-							Tags:               map[string]string{"key": "value"},
-						},
-					},
-				},
+			name: "multiple non-fatal errors",
+			asset: domain.NexposeAssetVulnerabilities{
+				ID:          1,
+				LastScanned: testTimestamp,
+				IP:          testIP,
+				Hostname:    testHostname,
 			},
-			respCodes: []int{
-				http.StatusNotFound,
-				http.StatusOK,
-			},
-			errExpected: false,
-			err:         nil,
-		},
-		{
-			name: "fetch by hostname returns bad request",
 			resps: []assetInventoryResponse{
 				{},
 				{},
 			},
-			respCodes: []int{
-				http.StatusNotFound,
-				http.StatusBadRequest,
-			},
-			errExpected: true,
-			err:         domain.AssetInventoryRequestError{},
-		},
-		{
-			name: "fetch by hostname returns multiple assets",
-			resps: []assetInventoryResponse{
-				{},
-				{
-					Response: []domain.CloudAssetDetails{
-						{
-							PrivateIPAddresses: []string{testIP},
-							PublicIPAddresses:  []string{testIP},
-							Hostnames:          []string{testHostname},
-							ResourceType:       "ec2",
-							AccountID:          "1234567890",
-							ARN:                "123",
-							Region:             "us-west-2",
-							Tags:               map[string]string{"key": "value"},
-						},
-						{
-							PrivateIPAddresses: []string{testIP},
-							PublicIPAddresses:  []string{testIP},
-							Hostnames:          []string{testHostname},
-							ResourceType:       "ec2",
-							AccountID:          "1234567890",
-							ARN:                "321",
-							Region:             "us-west-2",
-							Tags:               map[string]string{"key": "value"},
-						},
-					},
-				},
-			},
-			respCodes: []int{
-				http.StatusNotFound,
-				http.StatusOK,
-			},
-			errExpected: true,
-			err:         domain.AssetInventoryMultipleAssetsFoundError{},
-		},
-		{
-			name: "no assets found",
-			resps: []assetInventoryResponse{
-				{},
-				{},
-			},
-			respCodes: []int{
-				http.StatusNotFound,
-				http.StatusNotFound,
-			},
+			respCodes:   []int{http.StatusNotFound, http.StatusNotFound},
 			errExpected: true,
 			err:         domain.AssetNotFoundError{},
 		},
@@ -211,7 +147,7 @@ func TestAssetInventoryAPIAttributorAttribute(t *testing.T) {
 					StatusCode: tt.respCodes[i],
 				}, nil)
 			}
-			_, err := attributor.Attribute(context.Background(), testAsset)
+			_, err := attributor.Attribute(context.Background(), tt.asset)
 			if tt.errExpected {
 				require.IsType(t, tt.err, err)
 			} else {
@@ -233,12 +169,10 @@ func TestAssetInventoryAPIAttributorAttributeInvalidAssetTimestamp(t *testing.T)
 	}
 
 	testAsset := domain.NexposeAssetVulnerabilities{
-		Asset: domain.Asset{
-			ID:       1,
-			History:  []domain.AssetHistory{domain.AssetHistory{Type: "SCAN", Date: ""}},
-			IP:       testIP,
-			HostName: testHostname,
-		},
+		ID:          1,
+		LastScanned: time.Time{},
+		IP:          testIP,
+		Hostname:    testHostname,
 	}
 	_, err := attributor.Attribute(context.Background(), testAsset)
 	require.Error(t, err)
@@ -256,10 +190,8 @@ func TestAssetInventoryAPIAttributorAttributeNoHostnameOrIP(t *testing.T) {
 	}
 
 	testAsset := domain.NexposeAssetVulnerabilities{
-		Asset: domain.Asset{
-			ID:      1,
-			History: []domain.AssetHistory{domain.AssetHistory{Type: "SCAN", Date: "2019-04-22T15:02:44.000Z"}},
-		},
+		ID:          1,
+		LastScanned: time.Date(2019, time.April, 22, 15, 2, 44, 0, time.UTC),
 	}
 
 	_, err := attributor.Attribute(context.Background(), testAsset)
@@ -484,72 +416,4 @@ func TestFetchAssetNotOKStatusCodes(t *testing.T) {
 			require.EqualError(t, err, tt.err.Error())
 		})
 	}
-}
-
-func TestExtractTimestamp(t *testing.T) {
-	tc := []struct {
-		name        string
-		history     []domain.AssetHistory
-		expected    time.Time
-		expectedErr bool
-	}{
-		{
-			"single event",
-			[]domain.AssetHistory{domain.AssetHistory{Type: "SCAN", Date: "2019-04-22T15:02:44.000Z"}},
-			time.Date(2019, time.April, 22, 15, 2, 44, 0, time.UTC),
-			false,
-		},
-		{
-			"multiple events in chronological order",
-			[]domain.AssetHistory{
-				domain.AssetHistory{Type: "SCAN", Date: "2018-04-22T15:02:44.000Z"},
-				domain.AssetHistory{Type: "SCAN", Date: "2019-04-22T15:02:44.000Z"},
-			},
-			time.Date(2019, time.April, 22, 15, 2, 44, 0, time.UTC),
-			false,
-		},
-		{
-			"multiple events in non-chronological order",
-			[]domain.AssetHistory{
-				domain.AssetHistory{Type: "SCAN", Date: "2019-04-22T15:02:44.000Z"},
-				domain.AssetHistory{Type: "SCAN", Date: "2018-04-22T15:02:44.000Z"},
-			},
-			time.Date(2019, time.April, 22, 15, 2, 44, 0, time.UTC),
-			false,
-		},
-		{
-			"invalid date",
-			[]domain.AssetHistory{
-				domain.AssetHistory{Type: "SCAN", Date: "iamnotadate"},
-			},
-			time.Time{},
-			true,
-		},
-		{
-			"unknown event",
-			[]domain.AssetHistory{
-				domain.AssetHistory{Type: "FOO", Date: "2019-04-22T15:02:44.000Z"},
-			},
-			time.Time{},
-			true,
-		},
-		{
-			"multiple events in non-chronological order with unknkown event types",
-			[]domain.AssetHistory{
-				domain.AssetHistory{Type: "SCAN", Date: "2019-04-22T15:02:44.000Z"},
-				domain.AssetHistory{Type: "FOO", Date: "2017-04-22T15:02:44.000Z"},
-				domain.AssetHistory{Type: "SCAN", Date: "2018-04-22T15:02:44.000Z"},
-			},
-			time.Date(2019, time.April, 22, 15, 2, 44, 0, time.UTC),
-			false,
-		},
-	}
-	for _, tt := range tc {
-		t.Run(tt.name, func(t *testing.T) {
-			ts, err := extractTimestamp(tt.history)
-			assert.Equal(t, tt.expected, ts)
-			assert.Equal(t, tt.expectedErr, err != nil)
-		})
-	}
-
 }
