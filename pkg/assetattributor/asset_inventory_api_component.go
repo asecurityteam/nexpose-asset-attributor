@@ -12,7 +12,7 @@ type AssetInventoryAPIAttributorConfig struct {
 
 // Name is used by the settings library to replace the default naming convention.
 func (c *AssetInventoryAPIAttributorConfig) Name() string {
-	return "asset_inventory_api_attributor"
+	return "assetinventoryapiattributor"
 }
 
 // AssetInventoryAPIAttributorComponent satisfies the settings library Component API,
