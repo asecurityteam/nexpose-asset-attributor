@@ -29,7 +29,7 @@ type assetInventoryResponse struct {
 // asecurityteam/asset-inventory-api service
 type AssetInventoryAPIAttributor struct {
 	Client         *http.Client
-	Host           string
+	Host           *url.URL
 	CloudAssetPath string
 }
 
@@ -133,10 +133,7 @@ func (n *AssetInventoryAPIAttributor) Attribute(ctx context.Context, asset domai
 }
 
 func (n *AssetInventoryAPIAttributor) fetchAsset(ctx context.Context, idType string, id string, ts time.Time) ([]domain.CloudAssetDetails, error) {
-	u, e := url.Parse(n.Host)
-	if e != nil {
-		return []domain.CloudAssetDetails{}, e
-	}
+	u, _ := url.Parse(n.Host.String())
 	u.Path = path.Join(u.Path, n.CloudAssetPath, idType, id)
 	q := u.Query()
 	q.Set(timeQueryParam, ts.Format(time.RFC3339Nano))

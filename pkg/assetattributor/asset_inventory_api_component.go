@@ -2,6 +2,7 @@ package assetattributor
 
 import (
 	"context"
+	"net/url"
 )
 
 // AssetInventoryAPIAttributorConfig defines the configuration options for a AssetInventoryAPIAttributor.
@@ -12,7 +13,7 @@ type AssetInventoryAPIAttributorConfig struct {
 
 // Name is used by the settings library to replace the default naming convention.
 func (c *AssetInventoryAPIAttributorConfig) Name() string {
-	return "assetinventoryapiattributor"
+	return "attributor"
 }
 
 // AssetInventoryAPIAttributorComponent satisfies the settings library Component API,
@@ -27,8 +28,13 @@ func (*AssetInventoryAPIAttributorComponent) Settings() *AssetInventoryAPIAttrib
 
 // New constructs a ResourceTypeFilterer from a config.
 func (*AssetInventoryAPIAttributorComponent) New(_ context.Context, c *AssetInventoryAPIAttributorConfig) (*AssetInventoryAPIAttributor, error) {
+	host, e := url.Parse(c.Host)
+	if e != nil {
+		return nil, e
+	}
+
 	return &AssetInventoryAPIAttributor{
-		Host:           c.Host,
+		Host:           host,
 		CloudAssetPath: c.CloudAssetPath,
 	}, nil
 }
