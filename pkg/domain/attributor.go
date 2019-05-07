@@ -2,6 +2,7 @@ package domain
 
 import (
 	"context"
+	"fmt"
 	"time"
 )
 
@@ -30,7 +31,7 @@ type CloudAssetDetails struct {
 	ResourceType       string            `json:"resourceTypes"`
 	AccountID          string            `json:"accountID"`
 	Region             string            `json:"region"`
-	ResourceID         string            `json:"resourceID"`
+	ARN                string            `json:"arn"`
 	Tags               map[string]string `json:"tags"`
 }
 
@@ -39,4 +40,50 @@ type CloudAssetDetails struct {
 type NexposeAttributedAssetVulnerabilities struct {
 	NexposeAssetVulnerabilities
 	BusinessContext CloudAssetDetails `json:"businessContext"`
+}
+
+// AssetNotFoundError occurs when a request to an asset inventory system
+// returns either a 404 Not Found response, or a 200 OK response with no results
+type AssetNotFoundError struct {
+	Inner          error
+	AssetID        string
+	ScanTimestamp  string
+	AssetInventory string
+}
+
+func (err AssetNotFoundError) Error() string {
+	return fmt.Sprintf(
+		"Result not found for asset with ID %s as of scan time %s in asset inventory %s: %v",
+		err.AssetID, err.ScanTimestamp, err.AssetInventory, err.Inner)
+}
+
+// AssetInventoryRequestError occurs when a request to an asset inventory system
+// returns a failure response
+type AssetInventoryRequestError struct {
+	Inner          error
+	AssetID        string
+	ScanTimestamp  string
+	AssetInventory string
+	Code           int
+}
+
+func (err AssetInventoryRequestError) Error() string {
+	return fmt.Sprintf(
+		"Request to asset inventory %s failed with code %d for asset with ID %s as of scan time %s: %v",
+		err.AssetInventory, err.Code, err.AssetID, err.ScanTimestamp, err.Inner)
+}
+
+// AssetInventoryMultipleAssetsFoundError occurs when a request to an asset inventory system
+// returns a successful response with multiple assets
+type AssetInventoryMultipleAssetsFoundError struct {
+	Inner          error
+	AssetID        string
+	ScanTimestamp  string
+	AssetInventory string
+}
+
+func (err AssetInventoryMultipleAssetsFoundError) Error() string {
+	return fmt.Sprintf(
+		"Request to asset inventory %s returned multiple values for asset with ID %s as of scan time %s: %v",
+		err.AssetInventory, err.AssetID, err.ScanTimestamp, err.Inner)
 }

@@ -125,7 +125,7 @@
   revision = "c67367528e160e557423e4d87059614d8c31a582"
 
 [[projects]]
-  digest = "1:772057e3c30cb5bee83fb0ff67b9255f9d9aa551f500ed85c103e68b4ed02112"
+  digest = "1:ff8c32bee60523e39cd04e58b14fae0c3d6adcbc419e9e0c3d991af0390ab270"
   name = "github.com/rs/zerolog"
   packages = [
     ".",
@@ -133,8 +133,8 @@
     "internal/json",
   ]
   pruneopts = "UT"
-  revision = "651d361cfeb9d0f5b9f1d14b162c66c82509ef6d"
-  version = "v1.13.0"
+  revision = "acf3980132bfcdc48638724e6e3d9e5749b85999"
+  version = "v1.14.3"
 
 [[projects]]
   digest = "1:08d65904057412fc0270fc4812a1c90c594186819243160dc779a402d4b6d0bc"
@@ -145,9 +145,12 @@
   version = "v1.3.0"
 
 [[projects]]
-  digest = "1:972c2427413d41a1e06ca4897e8528e5a1622894050e2f527b38ddf0f343f759"
+  digest = "1:5da8ce674952566deae4dbc23d07c85caafc6cfa815b0b3e03e41979cedb8750"
   name = "github.com/stretchr/testify"
-  packages = ["assert"]
+  packages = [
+    "assert",
+    "require",
+  ]
   pruneopts = "UT"
   revision = "ffdc059bfe9ce6a4e144ba849dbedead332c6053"
   version = "v1.3.0"
@@ -158,13 +161,12 @@
   name = "golang.org/x/net"
   packages = ["context"]
   pruneopts = "UT"
-  revision = "eb5bcb51f2a31c7d5141d810b70815c05d9c9146"
+  revision = "9ce7a6920f093fc0b908c4a5f66ae049110f417e"
 
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
   input-imports = [
-    "github.com/asecurityteam/logevent",
     "github.com/asecurityteam/runhttp",
     "github.com/asecurityteam/serverfull/pkg",
     "github.com/asecurityteam/serverfull/pkg/domain",
@@ -172,6 +174,7 @@
     "github.com/aws/aws-lambda-go/lambda",
     "github.com/golang/mock/gomock",
     "github.com/stretchr/testify/assert",
+    "github.com/stretchr/testify/require",
   ]
   solver-name = "gps-cdcl"
   solver-version = 1

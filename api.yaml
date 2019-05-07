@@ -58,6 +58,7 @@ paths:
     post:
       description: Accepts a Nexpose asset payload with Nexpose vulnerabilities and returns the asset payload annotated with the business context associated with the asset at the time it was scanned by Nexpose.
       requestBody:
+        required: true
         content:
           application/json:
             schema:
@@ -71,6 +72,12 @@ paths:
                 $ref: '#/components/schemas/AssetWithVulnerabilitiesAndBusinessContext'
         "400":
             description: "Invalid input"
+            content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/Error'
+        "404":
+            description: "Not found"
             content:
               application/json:
                 schema:

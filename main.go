@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"net/http"
 	"os"
 
 	"github.com/aws/aws-lambda-go/lambda"
@@ -16,18 +17,24 @@ import (
 
 func main() {
 	ctx := context.Background()
+	source, err := settings.NewEnvSource(os.Environ())
+	if err != nil {
+		panic(err.Error())
+	}
+	assetInventoryAPIAttributorComponent := &assetattributor.AssetInventoryAPIAttributorComponent{}
+	assetInventoryAPIAttributor := new(assetattributor.AssetInventoryAPIAttributor)
+	if err = settings.NewComponent(ctx, source, assetInventoryAPIAttributorComponent, assetInventoryAPIAttributor); err != nil {
+		panic(err.Error())
+	}
+	assetInventoryAPIAttributor.Client = http.DefaultClient
+
 	attributeHandler := &v1.AttributeHandler{
-		AssetAttributor: assetattributor.NewNoOpAssetAttributor(),
+		AssetAttributor: assetInventoryAPIAttributor,
 		LogFn:           domain.LoggerFromContext,
 		StatFn:          domain.StatFromContext,
 	}
 	handlers := map[string]serverfulldomain.Handler{
 		"attribute": lambda.NewHandler(attributeHandler.Handle),
-	}
-
-	source, err := settings.NewEnvSource(os.Environ())
-	if err != nil {
-		panic(err.Error())
 	}
 	rt, err := serverfull.NewStatic(ctx, source, handlers)
 	if err != nil {

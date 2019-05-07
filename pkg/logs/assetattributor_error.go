@@ -15,6 +15,13 @@ type AssetInventoryRequestError struct {
 	Reason  string `logevent:"reason,default=asset-inventory-request-failed"`
 }
 
+// AssetInventoryMultipleAssetsFoundError occurs when asset attribution returns
+// more than one result for an asset
+type AssetInventoryMultipleAssetsFoundError struct {
+	Message string `logevent:"message,default=attribution-failure"`
+	Reason  string `logevent:"reason,default=asset-inventory-multiple-assets-found"`
+}
+
 // UnknownAttributionFailureError occurs when asset attribution fails for
 // an unexpected reason not covered by any other attribution failure error types
 type UnknownAttributionFailureError struct {

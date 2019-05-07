@@ -1,34 +1,59 @@
 package assetattributor
 
-import "fmt"
+import (
+	"fmt"
+	"strings"
+)
 
-// AssetNotFoundError occurs when a request to an asset inventory system
-// returns either a 404 Not Found response, or a 200 OK response with no results
-type AssetNotFoundError struct {
-	Inner          error
-	AssetID        string
-	ScanTimestamp  string
-	AssetInventory string
+// httpNotFound occurs when when a request to an asset inventory system returns a 404
+type httpNotFound struct {
+	ID   string
+	Type string
 }
 
-func (err AssetNotFoundError) Error() string {
-	return fmt.Sprintf(
-		"Result not found for asset with ID %v as of scan time %v in asset inventory %v: %v",
-		err.AssetID, err.ScanTimestamp, err.AssetInventory, err.Inner)
+func (err httpNotFound) Error() string {
+	return fmt.Sprintf("%s %s not found", err.Type, err.ID)
 }
 
-// AssetInventoryRequestError occurs when a request to an asset inventory system
-// returns a 5XX failure response
-type AssetInventoryRequestError struct {
-	Inner          error
-	AssetID        string
-	ScanTimestamp  string
-	AssetInventory string
-	Code           int
+// httpBadRequest occurs when when a request to an asset inventory system returns a 400
+type httpBadRequest struct {
+	ID     string
+	Type   string
+	Reason string
 }
 
-func (err AssetInventoryRequestError) Error() string {
-	return fmt.Sprintf(
-		"Request to asset inventory %v failed for asset with ID %v as of scan time %v: %v",
-		err.AssetInventory, err.AssetID, err.ScanTimestamp, err.Inner)
+func (err httpBadRequest) Error() string {
+	return fmt.Sprintf("bad request for %s %s: %s", err.Type, err.ID, err.Reason)
+}
+
+// httpRequestError occurs when when a request to an asset inventory system returns a 5XX error
+type httpRequestError struct {
+	ID     string
+	Type   string
+	Reason string
+}
+
+func (err httpRequestError) Error() string {
+	return fmt.Sprintf("request error for %s %s: %s", err.Type, err.ID, err.Reason)
+}
+
+// httpMultipleAssetsFoundError occurs when when a request to an asset inventory system successfully returns
+// multiple assets
+type httpMultipleAssetsFoundError struct {
+	ID          string
+	Type        string
+	FoundAssets []string
+}
+
+func (err httpMultipleAssetsFoundError) Error() string {
+	return fmt.Sprintf("request for %s %s returned multiple results: %s", err.Type, err.ID, strings.Join(err.FoundAssets, ", "))
+}
+
+// combinedError combines multiple error strings in a single message
+type combinedError struct {
+	Errors []error
+}
+
+func (err combinedError) Error() string {
+	return fmt.Sprintf("errors: %v", err.Errors)
 }
