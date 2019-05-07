@@ -90,12 +90,12 @@
   version = "v2.2.2"
 
 [[projects]]
-  digest = "1:b60efdeb75d3c0ceed88783ac2495256aba3491a537d0f31401202579fd62a94"
+  digest = "1:be408f349cae090a7c17a279633d6e62b00068e64af66a582cae0983de8890ea"
   name = "github.com/golang/mock"
   packages = ["gomock"]
   pruneopts = "UT"
-  revision = "51421b967af1f557f93a59e0057aaf15ca02e29c"
-  version = "v1.2.0"
+  revision = "937870445b8bddd7f05ea90e81c58ebe83681534"
+  version = "v1.3.0"
 
 [[projects]]
   digest = "1:0028cb19b2e4c3112225cd871870f2d9cf49b9b4276531f03438a88e94be86fe"
@@ -161,7 +161,7 @@
   name = "golang.org/x/net"
   packages = ["context"]
   pruneopts = "UT"
-  revision = "9ce7a6920f093fc0b908c4a5f66ae049110f417e"
+  revision = "f4e77d36d62c17c2336347bb2670ddbd02d092b7"
 
 [solve-meta]
   analyzer-name = "dep"
