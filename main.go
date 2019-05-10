@@ -5,13 +5,10 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/aws/aws-lambda-go/lambda"
-
 	"github.com/asecurityteam/nexpose-asset-attributor/pkg/assetattributor"
 	"github.com/asecurityteam/nexpose-asset-attributor/pkg/domain"
 	v1 "github.com/asecurityteam/nexpose-asset-attributor/pkg/handlers/v1"
-	serverfull "github.com/asecurityteam/serverfull/pkg"
-	serverfulldomain "github.com/asecurityteam/serverfull/pkg/domain"
+	"github.com/asecurityteam/serverfull"
 	"github.com/asecurityteam/settings"
 )
 
@@ -33,14 +30,11 @@ func main() {
 		LogFn:           domain.LoggerFromContext,
 		StatFn:          domain.StatFromContext,
 	}
-	handlers := map[string]serverfulldomain.Handler{
-		"attribute": lambda.NewHandler(attributeHandler.Handle),
+	handlers := map[string]serverfull.Function{
+		"attribute": serverfull.NewFunction(attributeHandler.Handle),
 	}
-	rt, err := serverfull.NewStatic(ctx, source, handlers)
-	if err != nil {
-		panic(err.Error())
-	}
-	if err := rt.Run(); err != nil {
+	fetcher := &serverfull.StaticFetcher{Functions: handlers}
+	if err := serverfull.Start(ctx, source, fetcher); err != nil {
 		panic(err.Error())
 	}
 }
