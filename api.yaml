@@ -7,9 +7,6 @@ x-runtime:
     output: "STDOUT"
   stats:
     output: "NULL"
-    datadog:
-      address: "statsd:8125"
-      flushinterval: "10s"
   signals:
     installed:
       - "OS"
@@ -85,7 +82,6 @@ paths:
       x-transportd:
         backend: app
         enabled:
-          - "metrics"
           - "accesslog"
           - "requestvalidation"
           - "responsevalidation"

@@ -23,7 +23,7 @@ type NexposeAssetVulnerabilities struct {
 	Vulnerabilities []AssetVulnerabilityDetails `json:"assetVulnerabilityDetails"`
 }
 
-// CloudAssetDetails represent an asset and associated metadata
+// CloudAssetDetails represent a cloud asset and associated metadata
 type CloudAssetDetails struct {
 	PrivateIPAddresses []string          `json:"privateIPAddresses"`
 	PublicIPAddresses  []string          `json:"publicIPAddresses"`

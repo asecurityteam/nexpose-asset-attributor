@@ -22,16 +22,48 @@ var testHostname = "hostname"
 var testTimestamp = time.Date(2019, time.April, 22, 15, 2, 44, 0, time.UTC)
 var errReason = ""
 
-func TestAssetInventoryAPIAttributorAttribute(t *testing.T) {
+func TestCloudAssetInventoryComponent_ParseURL(t *testing.T) {
+	tests := []struct {
+		name      string
+		host      string
+		expectErr bool
+	}{
+		{
+			name:      "valid host",
+			host:      "https://localhost:8080/v1/cloud",
+			expectErr: false,
+		},
+		{
+			name:      "invalid host",
+			host:      "~!@#$%^&*()_+:?><!@#$%^&*())_:/v1/cloud",
+			expectErr: true,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			c := NewCloudAssetInventoryComponent()
+			config := c.Settings()
+			config.Endpoint = tt.host
+			_, err := c.New(context.Background(), config)
+			if tt.expectErr {
+				require.Error(t, err)
+				return
+			}
+			require.NoError(t, err)
+		})
+	}
+}
+
+func TestCloudAssetInventory_Attribute(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 	mockRT := NewMockRoundTripper(ctrl)
 	u, _ := url.Parse("http://localhost")
 
-	attributor := AssetInventoryAPIAttributor{
-		Client:         &http.Client{Transport: mockRT},
-		Host:           u,
-		CloudAssetPath: "/v1/cloud",
+	attributor := CloudAssetInventory{
+		Client:   &http.Client{Transport: mockRT},
+		Endpoint: u,
 	}
 
 	testAssetDetails := domain.CloudAssetDetails{
@@ -48,7 +80,7 @@ func TestAssetInventoryAPIAttributorAttribute(t *testing.T) {
 	tc := []struct {
 		name        string
 		asset       domain.NexposeAssetVulnerabilities
-		resps       []assetInventoryResponse
+		resps       []cloudAssetInventoryResponse
 		respCodes   []int
 		errExpected bool
 		err         error
@@ -61,7 +93,7 @@ func TestAssetInventoryAPIAttributorAttribute(t *testing.T) {
 				IP:          testIP,
 				Hostname:    testHostname,
 			},
-			resps: []assetInventoryResponse{
+			resps: []cloudAssetInventoryResponse{
 				{
 					Response: []domain.CloudAssetDetails{
 						testAssetDetails,
@@ -85,7 +117,7 @@ func TestAssetInventoryAPIAttributorAttribute(t *testing.T) {
 				IP:          testIP,
 				Hostname:    testHostname,
 			},
-			resps: []assetInventoryResponse{
+			resps: []cloudAssetInventoryResponse{
 				{},
 				{
 					Response: []domain.CloudAssetDetails{
@@ -105,7 +137,7 @@ func TestAssetInventoryAPIAttributorAttribute(t *testing.T) {
 				IP:          testIP,
 				Hostname:    testHostname,
 			},
-			resps: []assetInventoryResponse{
+			resps: []cloudAssetInventoryResponse{
 				{
 					Response: []domain.CloudAssetDetails{
 						testAssetDetails,
@@ -130,7 +162,7 @@ func TestAssetInventoryAPIAttributorAttribute(t *testing.T) {
 				IP:          testIP,
 				Hostname:    testHostname,
 			},
-			resps: []assetInventoryResponse{
+			resps: []cloudAssetInventoryResponse{
 				{},
 				{},
 			},
@@ -159,16 +191,15 @@ func TestAssetInventoryAPIAttributorAttribute(t *testing.T) {
 	}
 }
 
-func TestAssetInventoryAPIAttributorAttributeInvalidAssetTimestamp(t *testing.T) {
+func TestCloudAssetInventory_Attribute_InvalidAssetTimestamp(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 	mockRT := NewMockRoundTripper(ctrl)
 	u, _ := url.Parse("http://localhost")
 
-	attributor := AssetInventoryAPIAttributor{
-		Client:         &http.Client{Transport: mockRT},
-		Host:           u,
-		CloudAssetPath: "/v1/cloud",
+	attributor := CloudAssetInventory{
+		Client:   &http.Client{Transport: mockRT},
+		Endpoint: u,
 	}
 
 	testAsset := domain.NexposeAssetVulnerabilities{
@@ -181,16 +212,15 @@ func TestAssetInventoryAPIAttributorAttributeInvalidAssetTimestamp(t *testing.T)
 	require.Error(t, err)
 }
 
-func TestAssetInventoryAPIAttributorAttributeNoHostnameOrIP(t *testing.T) {
+func TestCloudAssetInventory_Attribute_NoHostnameOrIP(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 	mockRT := NewMockRoundTripper(ctrl)
 	u, _ := url.Parse("http://localhost")
 
-	attributor := AssetInventoryAPIAttributor{
-		Client:         &http.Client{Transport: mockRT},
-		Host:           u,
-		CloudAssetPath: "/v1/cloud",
+	attributor := CloudAssetInventory{
+		Client:   &http.Client{Transport: mockRT},
+		Endpoint: u,
 	}
 
 	testAsset := domain.NexposeAssetVulnerabilities{
@@ -203,16 +233,15 @@ func TestAssetInventoryAPIAttributorAttributeNoHostnameOrIP(t *testing.T) {
 	require.IsType(t, domain.AssetNotFoundError{}, err)
 }
 
-func TestFetchAssetValidResponses(t *testing.T) {
+func TestCloudAssetInventory_FetchAsset_ValidResponses(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 	mockRT := NewMockRoundTripper(ctrl)
 	u, _ := url.Parse("http://localhost")
 
-	attributor := AssetInventoryAPIAttributor{
-		Client:         &http.Client{Transport: mockRT},
-		Host:           u,
-		CloudAssetPath: "/v1/cloud",
+	attributor := CloudAssetInventory{
+		Client:   &http.Client{Transport: mockRT},
+		Endpoint: u,
 	}
 
 	tc := []struct {
@@ -275,7 +304,7 @@ func TestFetchAssetValidResponses(t *testing.T) {
 
 	for _, tt := range tc {
 		t.Run(tt.name, func(t *testing.T) {
-			resp := assetInventoryResponse{Response: tt.resp}
+			resp := cloudAssetInventoryResponse{Response: tt.resp}
 			respJSON, _ := json.Marshal(resp)
 			mockRT.EXPECT().RoundTrip(gomock.Any()).Return(&http.Response{
 				Body:       ioutil.NopCloser(bytes.NewReader(respJSON)),
@@ -300,16 +329,15 @@ func TestFetchAssetValidResponses(t *testing.T) {
 	require.Error(t, err)
 }
 
-func TestFetchAssetUnmarshallError(t *testing.T) {
+func TestCloudAssetInventory_FetchAsset_UnmarshallError(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 	mockRT := NewMockRoundTripper(ctrl)
 	u, _ := url.Parse("http://localhost")
 
-	attributor := AssetInventoryAPIAttributor{
-		Client:         &http.Client{Transport: mockRT},
-		Host:           u,
-		CloudAssetPath: "/v1/cloud",
+	attributor := CloudAssetInventory{
+		Client:   &http.Client{Transport: mockRT},
+		Endpoint: u,
 	}
 	mockRT.EXPECT().RoundTrip(gomock.Any()).Return(&http.Response{
 		Body:       ioutil.NopCloser(bytes.NewReader([]byte("foo"))),
@@ -319,20 +347,17 @@ func TestFetchAssetUnmarshallError(t *testing.T) {
 	require.Error(t, err)
 }
 
-func TestFetchAssetResponseError(t *testing.T) {
+func TestCloudAssetInventory_FetchAsset_ResponseError(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 	mockRT := NewMockRoundTripper(ctrl)
 	u, _ := url.Parse("http://localhost")
 
-	attributor := AssetInventoryAPIAttributor{
-		Client:         &http.Client{Transport: mockRT},
-		Host:           u,
-		CloudAssetPath: "/v1/cloud",
+	attributor := CloudAssetInventory{
+		Client:   &http.Client{Transport: mockRT},
+		Endpoint: u,
 	}
-	mockRT.EXPECT().RoundTrip(gomock.Any()).Return(&http.Response{
-		Body: nil,
-	}, fmt.Errorf("response error"))
+	mockRT.EXPECT().RoundTrip(gomock.Any()).Return(nil, fmt.Errorf("response error"))
 	_, err := attributor.fetchAsset(context.Background(), resourcePathTypeIP, testIP, time.Time{})
 	require.Error(t, err)
 }
@@ -345,16 +370,15 @@ func (r errReader) Read(_ []byte) (int, error) {
 	return 0, r.Error
 }
 
-func TestFetchAssetErrorReadingResponse(t *testing.T) {
+func TestCloudAssetInventory_FetchAsset_ErrorReadingResponse(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 	mockRT := NewMockRoundTripper(ctrl)
 	u, _ := url.Parse("http://localhost")
 
-	attributor := AssetInventoryAPIAttributor{
-		Client:         &http.Client{Transport: mockRT},
-		Host:           u,
-		CloudAssetPath: "/v1/cloud",
+	attributor := CloudAssetInventory{
+		Client:   &http.Client{Transport: mockRT},
+		Endpoint: u,
 	}
 	mockRT.EXPECT().RoundTrip(gomock.Any()).Return(&http.Response{
 		Body:       ioutil.NopCloser(errReader{Error: fmt.Errorf("reader error")}),
@@ -364,16 +388,15 @@ func TestFetchAssetErrorReadingResponse(t *testing.T) {
 	require.Error(t, err)
 }
 
-func TestFetchAssetNotOKStatusCodes(t *testing.T) {
+func TestCloudAssetInventory_FetchAsset_NotOKStatusCodes(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 	mockRT := NewMockRoundTripper(ctrl)
 	u, _ := url.Parse("http://localhost")
 
-	attributor := AssetInventoryAPIAttributor{
-		Client:         &http.Client{Transport: mockRT},
-		Host:           u,
-		CloudAssetPath: "/v1/cloud",
+	attributor := CloudAssetInventory{
+		Client:   &http.Client{Transport: mockRT},
+		Endpoint: u,
 	}
 
 	tc := []struct {
