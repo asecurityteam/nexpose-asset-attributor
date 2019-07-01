@@ -21,7 +21,7 @@
 <a id="markdown-overview" name="overview"></a>
 ## Overview
 
-The nexpose-asset-attributor provides a lambda handler with accepts payloads containing an asset and a list of
+The nexpose-asset-attributor provides a lambda handler which accepts payloads containing an asset and a list of
 vulnerabilities associated with that asset, as defined in the [nexpose-vuln-hydrator service](https://github.com/asecurityteam/nexpose-vuln-hydrator/blob/master/pkg/domain/hydrator.go), and attempts to query asset
 inventory systems to provide additional business context for the asset.
 
