@@ -15,9 +15,9 @@ type AttributeHandler struct {
 	StatFn          domain.StatFn
 }
 
-// Handle processes the incoming domain.NexposeAssetVulnerabilities instance, queries available asset inventory systems via its
-// AssetAttributor, and returns a domain.AttributedAssetVulnerabilities instance, annotated with the business context of the asset
-// at Nexpose scan time.
+// Handle processes the incoming domain.NexposeAssetVulnerabilities instance, queries available asset inventory systems
+// via its AssetAttributor, and produces a domain.AttributedAssetVulnerabilities instance to a stream, annotated with
+// the business context of the asset at Nexpose scan time.
 func (h *AttributeHandler) Handle(ctx context.Context, assetVulns domain.NexposeAssetVulnerabilities) error {
 	logger := h.LogFn(ctx)
 
