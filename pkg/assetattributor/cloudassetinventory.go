@@ -11,31 +11,80 @@ import (
 	"sync"
 	"time"
 
+	httpclient "github.com/asecurityteam/component-httpclient"
 	"github.com/asecurityteam/nexpose-asset-attributor/pkg/domain"
 )
 
 const (
-	assetInventoryAPIIdentifier = "asset-inventory-api"
-	timeQueryParam              = "time"
-	resourcePathTypeIP          = "ip"
-	resourcePathTypeHostname    = "hostname"
+	cloudAssetInventoryIdentifier = "asset-inventory-api"
+	timeQueryParam                = "time"
+	resourcePathTypeIP            = "ip"
+	resourcePathTypeHostname      = "hostname"
 )
 
-type assetInventoryResponse struct {
+// CloudAssetInventoryConfig contains settings for the CloudAssetInventoryComponent.
+type CloudAssetInventoryConfig struct {
+	HTTP     *httpclient.Config
+	Endpoint string `description:"The URL of asset-inventory-api's cloud endpoint."`
+}
+
+// Name of the configuration root.
+func (*CloudAssetInventoryComponent) Name() string {
+	return "CloudAssetInventory"
+}
+
+// CloudAssetInventoryComponent is the component for the cloud asset inventory client.
+type CloudAssetInventoryComponent struct {
+	HTTP     *httpclient.Component
+	Endpoint *url.URL
+}
+
+// NewCloudAssetInventoryComponent generates a CloudAssetInventoryComponent.
+func NewCloudAssetInventoryComponent() *CloudAssetInventoryComponent {
+	return &CloudAssetInventoryComponent{
+		HTTP: httpclient.NewComponent(),
+	}
+}
+
+// Settings generates the default configuration.
+func (c *CloudAssetInventoryComponent) Settings() *CloudAssetInventoryConfig {
+	return &CloudAssetInventoryConfig{
+		HTTP: c.HTTP.Settings(),
+	}
+}
+
+// New generates a Subcription decorator.
+func (c *CloudAssetInventoryComponent) New(ctx context.Context, conf *CloudAssetInventoryConfig) (*CloudAssetInventory, error) {
+	rt, e := c.HTTP.New(ctx, conf.HTTP)
+	if e != nil {
+		return nil, e
+	}
+	u, e := url.Parse(conf.Endpoint)
+	if e != nil {
+		return nil, e
+	}
+	return &CloudAssetInventory{
+		Client: &http.Client{
+			Transport: rt,
+		},
+		Endpoint: u,
+	}, nil
+}
+
+type cloudAssetInventoryResponse struct {
 	Response []domain.CloudAssetDetails `json:"response"`
 }
 
-// AssetInventoryAPIAttributor is an implementation of AssetAttributor that queries the
-// asecurityteam/asset-inventory-api service
-type AssetInventoryAPIAttributor struct {
-	Client         *http.Client
-	Host           *url.URL
-	CloudAssetPath string
+// CloudAssetInventory is an implementation of AssetAttributor that queries the
+// asecurityteam/asset-inventory-api service's cloud asset API.
+type CloudAssetInventory struct {
+	Client   *http.Client
+	Endpoint *url.URL
 }
 
 // Attribute queries the asecurityteam/asset-inventory-api service first by IP, then by hostname
 // if the first query returns no results
-func (n *AssetInventoryAPIAttributor) Attribute(ctx context.Context, asset domain.NexposeAssetVulnerabilities) (domain.NexposeAttributedAssetVulnerabilities, error) {
+func (n *CloudAssetInventory) Attribute(ctx context.Context, asset domain.NexposeAssetVulnerabilities) (domain.NexposeAttributedAssetVulnerabilities, error) {
 	if asset.LastScanned.IsZero() {
 		return domain.NexposeAttributedAssetVulnerabilities{}, fmt.Errorf("no valid timestamp in scan history")
 	}
@@ -45,7 +94,7 @@ func (n *AssetInventoryAPIAttributor) Attribute(ctx context.Context, asset domai
 			Inner:          fmt.Errorf("asset has no IP or hostname"),
 			AssetID:        fmt.Sprintf("%d", asset.ID),
 			ScanTimestamp:  asset.LastScanned.Format(time.RFC3339Nano),
-			AssetInventory: assetInventoryAPIIdentifier,
+			AssetInventory: cloudAssetInventoryIdentifier,
 		}
 	}
 
@@ -94,14 +143,14 @@ func (n *AssetInventoryAPIAttributor) Attribute(ctx context.Context, asset domai
 				Inner:          e,
 				AssetID:        fmt.Sprintf("%d", asset.ID),
 				ScanTimestamp:  asset.LastScanned.Format(time.RFC3339Nano),
-				AssetInventory: assetInventoryAPIIdentifier,
+				AssetInventory: cloudAssetInventoryIdentifier,
 			}
 		case httpBadRequest:
 			return domain.NexposeAttributedAssetVulnerabilities{}, domain.AssetInventoryRequestError{
 				Inner:          e,
 				AssetID:        fmt.Sprintf("%d", asset.ID),
 				ScanTimestamp:  asset.LastScanned.Format(time.RFC3339Nano),
-				AssetInventory: assetInventoryAPIIdentifier,
+				AssetInventory: cloudAssetInventoryIdentifier,
 				Code:           http.StatusBadRequest,
 			}
 		}
@@ -114,7 +163,7 @@ func (n *AssetInventoryAPIAttributor) Attribute(ctx context.Context, asset domai
 			Inner:          combinedError{Errors: outerErrs},
 			AssetID:        fmt.Sprintf("%d", asset.ID),
 			ScanTimestamp:  asset.LastScanned.Format(time.RFC3339Nano),
-			AssetInventory: assetInventoryAPIIdentifier,
+			AssetInventory: cloudAssetInventoryIdentifier,
 		}
 	}
 
@@ -132,9 +181,9 @@ func (n *AssetInventoryAPIAttributor) Attribute(ctx context.Context, asset domai
 	}, nil
 }
 
-func (n *AssetInventoryAPIAttributor) fetchAsset(ctx context.Context, idType string, id string, ts time.Time) ([]domain.CloudAssetDetails, error) {
-	u, _ := url.Parse(n.Host.String())
-	u.Path = path.Join(u.Path, n.CloudAssetPath, idType, id)
+func (n *CloudAssetInventory) fetchAsset(ctx context.Context, idType string, id string, ts time.Time) ([]domain.CloudAssetDetails, error) {
+	u, _ := url.Parse(n.Endpoint.String())
+	u.Path = path.Join(u.Path, idType, id)
 	q := u.Query()
 	q.Set(timeQueryParam, ts.Format(time.RFC3339Nano))
 	u.RawQuery = q.Encode()
@@ -159,7 +208,7 @@ func (n *AssetInventoryAPIAttributor) fetchAsset(ctx context.Context, idType str
 		return []domain.CloudAssetDetails{}, httpRequestError{ID: id, Type: idType, Reason: string(respBody)}
 	}
 
-	var assetDetails assetInventoryResponse
+	var assetDetails cloudAssetInventoryResponse
 	if e := json.Unmarshal(respBody, &assetDetails); e != nil {
 		return []domain.CloudAssetDetails{}, e
 	}

@@ -9,15 +9,16 @@ import (
 
 // AttributeHandler handles the Attribution endpoint for nexpose-asset-attributor
 type AttributeHandler struct {
+	Producer        domain.Producer
 	AssetAttributor domain.AssetAttributor
 	LogFn           domain.LogFn
 	StatFn          domain.StatFn
 }
 
-// Handle processes the incoming domain.NexposeAssetVulnerabilities instance, queries available asset inventory systems via its
-// AssetAttributor, and returns a domain.AttributedAssetVulnerabilities instance, annotated with the business context of the asset
-// at Nexpose scan time.
-func (h *AttributeHandler) Handle(ctx context.Context, assetVulns domain.NexposeAssetVulnerabilities) (domain.NexposeAttributedAssetVulnerabilities, error) {
+// Handle processes the incoming domain.NexposeAssetVulnerabilities instance, queries available asset inventory systems
+// via its AssetAttributor, and produces a domain.AttributedAssetVulnerabilities instance to a stream, annotated with
+// the business context of the asset at Nexpose scan time.
+func (h *AttributeHandler) Handle(ctx context.Context, assetVulns domain.NexposeAssetVulnerabilities) error {
 	logger := h.LogFn(ctx)
 
 	attributedAssetVulns, err := h.AssetAttributor.Attribute(ctx, assetVulns)
@@ -25,17 +26,18 @@ func (h *AttributeHandler) Handle(ctx context.Context, assetVulns domain.Nexpose
 		switch err.(type) {
 		case domain.AssetNotFoundError:
 			logger.Error(logs.AssetNotFoundError{Reason: err.Error()})
-			return domain.NexposeAttributedAssetVulnerabilities{}, err
+			return err
 		case domain.AssetInventoryRequestError:
 			logger.Error(logs.AssetInventoryRequestError{Reason: err.Error()})
-			return domain.NexposeAttributedAssetVulnerabilities{}, err
+			return err
 		case domain.AssetInventoryMultipleAssetsFoundError:
 			logger.Error(logs.AssetInventoryMultipleAssetsFoundError{Reason: err.Error()})
-			return domain.NexposeAttributedAssetVulnerabilities{}, err
+			return err
 		default:
 			logger.Error(logs.UnknownAttributionFailureError{Reason: err.Error()})
-			return domain.NexposeAttributedAssetVulnerabilities{}, err
+			return err
 		}
 	}
-	return attributedAssetVulns, nil
+	_, err = h.Producer.Produce(ctx, attributedAssetVulns)
+	return err
 }
