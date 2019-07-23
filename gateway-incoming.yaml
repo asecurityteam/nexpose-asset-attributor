@@ -59,14 +59,13 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/AssetWithVulnerabilities'
+              anyOf:
+                # an asset needs either a hostname OR an IP (or both)
+                - $ref: '#/components/schemas/AssetVulnerabilitiesWithIP'
+                - $ref: '#/components/schemas/AssetVulnerabilitiesWithHostname'
       responses:
-        "200":
+        "204":
           description: "Success"
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/AssetWithVulnerabilitiesAndBusinessContext'
         "400":
             description: "Invalid input"
             content:
@@ -90,7 +89,7 @@ paths:
           arn: "attribute"
           async: false
           request: '#! json .Request.Body !#'
-          success: '{"status": 200, "bodyPassthrough": true}'
+          success: '{"status": 204, "bodyPassthrough": true}'
           error: >
             {
               "status":
@@ -123,7 +122,7 @@ components:
         reason:
           type: string
           description: Detailed information about the error
-    AssetWithVulnerabilities:
+    AssetVulnerabilitiesWithIP:
       type: object
       required:
         - id
@@ -131,10 +130,6 @@ components:
         - lastScanned
         - assetVulnerabilityDetails
       properties:
-        hostname:
-          type: string
-          example: corporate-workstation-1102DC.acme.com
-          description: The primary host name (local or FQDN) of the asset.
         id:
           type: integer
           format: int64
@@ -144,6 +139,32 @@ components:
           type: string
           example: 182.34.74.202
           description: The primary IPv4 or IPv6 address of the asset.
+        lastScanned:
+          type: string
+          format: date-time
+          description: The last time the asset was scanned.
+        assetVulnerabilityDetails:
+          type: array
+          description: List of vulnerabilities found on the asset.
+          items:
+            $ref: '#/components/schemas/AssetVulnerabilityDetails'
+    AssetVulnerabilitiesWithHostname:
+      type: object
+      required:
+        - id
+        - hostname
+        - lastScanned
+        - assetVulnerabilityDetails
+      properties:
+        id:
+          type: integer
+          format: int64
+          example: 282
+          description: The identifier of the asset.
+        hostname:
+          type: string
+          example: corporate-workstation-1102DC.acme.com
+          description: The primary host name (local or FQDN) of the asset.
         lastScanned:
           type: string
           format: date-time
@@ -225,79 +246,3 @@ components:
             - esp
             - nd
             - raw
-    BusinessContext:
-      type: object
-      description: The "real world" aspects of the asset helpful for assigning remediations to teams and people.
-      properties:
-        privateIPAddresses:
-          type: array
-          description: All private IP addresses attached to the asset.
-          items:
-            type: string
-        publicIPAddresses:
-          type: array
-          description: All public IP addresses attached to the asset.
-          items:
-            type: string
-        hostnames:
-          type: array
-          description: All hostnames attached to the asset.
-          items:
-            type: string
-        resourceType:
-          type: string
-          description: The type of device.
-          example: "ec2:instance"
-        accountID:
-          type: string
-          description: Account ID associated with the asset, if applicable.
-          example: "8675309"
-        region:
-          type: string
-          description: Region where the asset is deployed.
-          example: "us-west"
-        resourceID:
-          type: string
-          description: Identifier for this asset that may be different from its Nexpose identified.
-          example: "arn:aws:a4b:us-east-1:123456789012:room/7315ffdf0eeb874dc4ab8a546e8b70ec/5f90e5d608b6baa9c88db56654aef158"
-        tags:
-          type: object
-          description: Freeform tags attached to the asset in an asset inventory system
-          additionalProperties:
-            type: string
-          example:
-            resource_owner: "service_owner@example.com"
-            business_unit: "Acme Product Team"
-            service_name: "example_service"
-    AssetWithVulnerabilitiesAndBusinessContext:
-      type: object
-      required:
-        - id
-        - ip
-        - lastScanned
-        - assetVulnerabilityDetails
-      properties:
-        hostname:
-          type: string
-          example: corporate-workstation-1102DC.acme.com
-          description: The primary host name (local or FQDN) of the asset.
-        id:
-          type: integer
-          format: int64
-          example: 282
-          description: The identifier of the asset.
-        ip:
-          type: string
-          example: 182.34.74.202
-          description: The primary IPv4 or IPv6 address of the asset.
-        lastScanned:
-          type: string
-          format: date-time
-          description: The last time the asset was scanned.
-        assetVulnerabilityDetails:
-          type: array
-          description: List of vulnerabilities found on the asset.
-          items:
-            $ref: '#/components/schemas/AssetVulnerabilityDetails'
-        businessContext:
-          $ref: '#/components/schemas/BusinessContext'
