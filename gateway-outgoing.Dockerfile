@@ -1,3 +1,3 @@
 FROM asecurityteam/serverfull-gateway
-COPY gateway-incoming.yaml .
-ENV TRANSPORTD_OPENAPI_SPECIFICATION_FILE="gateway-incoming.yaml"
+COPY gateway-outgoing.yaml .
+ENV TRANSPORTD_OPENAPI_SPECIFICATION_FILE="gateway-outgoing.yaml"
