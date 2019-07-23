@@ -68,7 +68,6 @@ paths:
         backend: queue
         enabled:
           - "accesslog"
-          - "metrics"
           - "requestvalidation"
           - "timeout"
           - "retry"
