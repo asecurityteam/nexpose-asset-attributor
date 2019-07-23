@@ -29,9 +29,15 @@ services:
       NEXPOSEASSETATTRIBUTOR_CLOUDASSETINVENTORY_ENDPOINT:
       NEXPOSEASSETATTRIBUTOR_CLOUDASSETINVENTORY_HTTPCLIENT_TYPE: "default"
       NEXPOSEASSETATTRIBUTOR_CLOUDASSETINVENTORY_HTTPCLIENT_SMART_OPENAPI: ""
-  gateway:
+  gateway-incoming:
     build:
       context: .
-      dockerfile: gateway.Dockerfile
+      dockerfile: gateway-incoming.Dockerfile
     ports:
       - "8080:8080"
+  gateway-outgoing:
+    build:
+      context: .
+      dockerfile: gateway-outgoing.Dockerfile
+    ports:
+      - "8082:8082"
