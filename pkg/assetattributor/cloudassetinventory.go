@@ -29,7 +29,7 @@ type CloudAssetInventoryConfig struct {
 }
 
 // Name of the configuration root.
-func (*CloudAssetInventoryComponent) Name() string {
+func (*CloudAssetInventoryConfig) Name() string {
 	return "CloudAssetInventory"
 }
 
