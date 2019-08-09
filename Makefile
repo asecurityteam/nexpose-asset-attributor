@@ -1,9 +1,5 @@
 TAG := $(shell git rev-parse --short HEAD)
 DIR := $(shell pwd -L)
-GOPATH := ${GOPATH}
-ifeq ($(GOPATH),)
-	GOPATH := ${HOME}/go
-endif
 
 dep:
 	docker run -ti \
