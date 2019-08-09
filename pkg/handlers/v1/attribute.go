@@ -20,12 +20,14 @@ type AttributeHandler struct {
 // the business context of the asset at Nexpose scan time.
 func (h *AttributeHandler) Handle(ctx context.Context, assetVulns domain.NexposeAssetVulnerabilities) error {
 	logger := h.LogFn(ctx)
+	stater := h.StatFn(ctx)
 
 	attributedAssetVulns, err := h.AssetAttributor.Attribute(ctx, assetVulns)
 	if err != nil {
 		switch err.(type) {
 		case domain.AssetNotFoundError:
 			logger.Error(logs.AssetNotFoundError{Reason: err.Error()})
+			stater.Count("nexpose.attribution.failure", 1)
 			return err
 		case domain.AssetInventoryRequestError:
 			logger.Error(logs.AssetInventoryRequestError{Reason: err.Error()})
