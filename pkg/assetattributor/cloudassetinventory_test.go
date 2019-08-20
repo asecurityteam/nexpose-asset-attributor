@@ -60,6 +60,14 @@ func TestCloudAssetInventoryComponent_ParseURL(t *testing.T) {
 	}
 }
 
+func TestCloudAssetInventoryComponent_NewConfigError(t *testing.T) {
+	c := NewCloudAssetInventoryComponent()
+	config := c.Settings()
+	config.HTTP.Type = "UNKNOWN"
+	_, err := c.New(context.Background(), config)
+	require.Error(t, err)
+}
+
 func TestCloudAssetInventory_Attribute(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
