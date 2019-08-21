@@ -22,6 +22,11 @@ var testHostname = "hostname"
 var testTimestamp = time.Date(2019, time.April, 22, 15, 2, 44, 0, time.UTC)
 var errReason = ""
 
+func TestCloudAssetInventoryConfigName(t *testing.T) {
+	cloudAssetInventoryConfig := CloudAssetInventoryConfig{}
+	require.Equal(t, "CloudAssetInventory", cloudAssetInventoryConfig.Name())
+}
+
 func TestCloudAssetInventoryComponent_ParseURL(t *testing.T) {
 	tests := []struct {
 		name      string
@@ -53,6 +58,14 @@ func TestCloudAssetInventoryComponent_ParseURL(t *testing.T) {
 			require.NoError(t, err)
 		})
 	}
+}
+
+func TestCloudAssetInventoryComponent_NewConfigError(t *testing.T) {
+	c := NewCloudAssetInventoryComponent()
+	config := c.Settings()
+	config.HTTP.Type = "UNKNOWN"
+	_, err := c.New(context.Background(), config)
+	require.Error(t, err)
 }
 
 func TestCloudAssetInventory_Attribute(t *testing.T) {
