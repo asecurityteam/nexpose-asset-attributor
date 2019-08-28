@@ -17,22 +17,22 @@ type AssetAttributor interface {
 // with assetVulnerabilityDetails
 type NexposeAssetVulnerabilities struct {
 	LastScanned     time.Time                   `json:"lastScanned"`
-	Hostname        string                      `json:"hostname"`
+	Hostname        string                      `json:"hostname,omitempty"`
 	ID              int64                       `json:"id"`
-	IP              string                      `json:"ip"`
+	IP              string                      `json:"ip,omitempty"`
 	Vulnerabilities []AssetVulnerabilityDetails `json:"assetVulnerabilityDetails"`
 }
 
 // CloudAssetDetails represent a cloud asset and associated metadata
 type CloudAssetDetails struct {
-	PrivateIPAddresses []string          `json:"privateIPAddresses"`
-	PublicIPAddresses  []string          `json:"publicIPAddresses"`
-	Hostnames          []string          `json:"hostnames"`
-	ResourceType       string            `json:"resourceTypes"`
-	AccountID          string            `json:"accountID"`
-	Region             string            `json:"region"`
-	ARN                string            `json:"arn"`
-	Tags               map[string]string `json:"tags"`
+	PrivateIPAddresses []string          `json:"privateIPAddresses,omitempty"`
+	PublicIPAddresses  []string          `json:"publicIPAddresses,omitempty"`
+	Hostnames          []string          `json:"hostnames,omitempty"`
+	ResourceType       string            `json:"resourceTypes,omitempty"`
+	AccountID          string            `json:"accountID,omitempty"`
+	Region             string            `json:"region,omitempty"`
+	ARN                string            `json:"arn,omitempty"`
+	Tags               map[string]string `json:"tags,omitempty"`
 }
 
 // NexposeAttributedAssetVulnerabilities is a NexposeAssetVulnerabilities instance combined
