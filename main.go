@@ -57,7 +57,13 @@ func (c *component) New(ctx context.Context, conf *config) (func(context.Context
 		LogFn:           domain.LoggerFromContext,
 		StatFn:          domain.StatFromContext,
 		AssetAttributor: a,
-		Producer:        p,
+		// AttributionFailureHandler field is simply a stub, it varies org to org
+		AttributionFailureHandler: {
+			HandleAttributionFailure: func(ctx context.Context, failedAttributedAsset NexposeAttributedAssetVulnerabilities) {
+				return nil
+			},
+		},
+		Producer: p,
 	}
 	handlers := map[string]serverfull.Function{
 		"attribute": serverfull.NewFunction(attributeHandler.Handle),
