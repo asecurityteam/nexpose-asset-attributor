@@ -9,10 +9,11 @@ import (
 
 // AttributeHandler handles the Attribution endpoint for nexpose-asset-attributor
 type AttributeHandler struct {
-	Producer        domain.Producer
-	AssetAttributor domain.AssetAttributor
-	LogFn           domain.LogFn
-	StatFn          domain.StatFn
+	Producer                  domain.Producer
+	AssetAttributor           domain.AssetAttributor
+	AttributionFailureHandler domain.AttributionFailureHandler // used as a generic handler if an asset has incomplete attributes
+	LogFn                     domain.LogFn
+	StatFn                    domain.StatFn
 }
 
 // Handle processes the incoming domain.NexposeAssetVulnerabilities instance, queries available asset inventory systems
@@ -21,23 +22,28 @@ type AttributeHandler struct {
 func (h *AttributeHandler) Handle(ctx context.Context, assetVulns domain.NexposeAssetVulnerabilities) error {
 	logger := h.LogFn(ctx)
 
-	attributedAssetVulns, err := h.AssetAttributor.Attribute(ctx, assetVulns)
-	if err != nil {
-		switch err.(type) {
+	attributedAssetVulns, attributionErr := h.AssetAttributor.Attribute(ctx, assetVulns)
+	if attributionErr != nil {
+		switch attributionErr.(type) {
 		case domain.AssetNotFoundError:
-			logger.Error(logs.AssetNotFoundError{Reason: err.Error()})
-			return err
+			logger.Error(logs.AssetNotFoundError{Reason: attributionErr.Error()})
+			err := h.AttributionFailureHandler.HandleAttributionFailure(ctx, attributedAssetVulns)
+			if err != nil {
+				return err
+			}
 		case domain.AssetInventoryRequestError:
-			logger.Error(logs.AssetInventoryRequestError{Reason: err.Error()})
-			return err
+			logger.Error(logs.AssetInventoryRequestError{Reason: attributionErr.Error()})
 		case domain.AssetInventoryMultipleAssetsFoundError:
-			logger.Error(logs.AssetInventoryMultipleAssetsFoundError{Reason: err.Error()})
-			return err
+			logger.Error(logs.AssetInventoryMultipleAssetsFoundError{Reason: attributionErr.Error()})
+			err := h.AttributionFailureHandler.HandleAttributionFailure(ctx, attributedAssetVulns)
+			if err != nil {
+				return err
+			}
 		default:
-			logger.Error(logs.UnknownAttributionFailureError{Reason: err.Error()})
-			return err
+			logger.Error(logs.UnknownAttributionFailureError{Reason: attributionErr.Error()})
 		}
+		return attributionErr
 	}
-	_, err = h.Producer.Produce(ctx, attributedAssetVulns)
+	_, err := h.Producer.Produce(ctx, attributedAssetVulns)
 	return err
 }

@@ -7,6 +7,7 @@ import (
 	"os"
 
 	producer "github.com/asecurityteam/component-producer"
+	"github.com/asecurityteam/nexpose-asset-attributor/pkg/assetattributionfailure"
 	"github.com/asecurityteam/nexpose-asset-attributor/pkg/assetattributor"
 	"github.com/asecurityteam/nexpose-asset-attributor/pkg/domain"
 	v1 "github.com/asecurityteam/nexpose-asset-attributor/pkg/handlers/v1"
@@ -57,7 +58,9 @@ func (c *component) New(ctx context.Context, conf *config) (func(context.Context
 		LogFn:           domain.LoggerFromContext,
 		StatFn:          domain.StatFromContext,
 		AssetAttributor: a,
-		Producer:        p,
+		// AttributionFailureHandler field is simply a stub, it varies org to org
+		AttributionFailureHandler: &assetattributionfailure.NoopAttributionFailureHandler{},
+		Producer:                  p,
 	}
 	handlers := map[string]serverfull.Function{
 		"attribute": serverfull.NewFunction(attributeHandler.Handle),

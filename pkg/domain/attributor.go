@@ -87,3 +87,12 @@ func (err AssetInventoryMultipleAssetsFoundError) Error() string {
 		"Request to asset inventory %s returned multiple values for asset with ID %s as of scan time %s: %v",
 		err.AssetInventory, err.AssetID, err.ScanTimestamp, err.Inner)
 }
+
+// AttributionFailureHandler is an interface that handles assets that could not be completely
+// attributed. The methods to implement might vary organization to organization
+type AttributionFailureHandler interface {
+	// This method is left to the discretion of the organization. For example, we may want to store their attribution failures encrypted
+	// in a persistent store, while others may want to persist theirs in a long-lived encrypted queue, or rely on a streaming platform
+	// like Kafka to keep the data until it can be investigated.
+	HandleAttributionFailure(ctx context.Context, failedAttributedAsset NexposeAttributedAssetVulnerabilities) error
+}
