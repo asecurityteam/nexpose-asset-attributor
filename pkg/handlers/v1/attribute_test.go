@@ -62,6 +62,7 @@ func TestHandle(t *testing.T) {
 			err:         domain.AssetInventoryMultipleAssetsFoundError{},
 			attributeOK: false,
 			AttributionFailureHandlerFunc: func(mockAttributionFailureHandler *MockAttributionFailureHandler) {
+				mockAttributionFailureHandler.EXPECT().HandleAttributionFailure(gomock.Any(), gomock.Any()).Return(nil)
 			},
 		},
 		{
