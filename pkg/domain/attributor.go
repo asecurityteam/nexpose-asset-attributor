@@ -89,7 +89,7 @@ func (err AssetInventoryMultipleAssetsFoundError) Error() string {
 }
 
 // AttributionFailureHandler is an interface that handles assets that could not be completely
-// attritbuted. The methods to implement might vary organization to organization
+// attributed. The methods to implement might vary organization to organization
 type AttributionFailureHandler interface {
 	// This method is left to the discretion of the organization. For example, we may want to store their attribution failures encrypted
 	// in a persistent store, while others may want to persist theirs in a long-lived encrypted queue, or rely on a streaming platform
