@@ -11,7 +11,7 @@ import (
 type AttributeHandler struct {
 	Producer                  domain.Producer
 	AssetAttributor           domain.AssetAttributor
-	AttributionFailureHandler domain.IncompleteAttributionHandler // used as a generic handler if an asset has incomplete attributes
+	AttributionFailureHandler domain.AttributionFailureHandler // used as a generic handler if an asset has incomplete attributes
 	LogFn                     domain.LogFn
 	StatFn                    domain.StatFn
 }
@@ -27,7 +27,7 @@ func (h *AttributeHandler) Handle(ctx context.Context, assetVulns domain.Nexpose
 		switch err.(type) {
 		case domain.AssetNotFoundError:
 			logger.Error(logs.AssetNotFoundError{Reason: err.Error()})
-			err = h.AttributionFailureHandler.HandleIncompleteAttribution(ctx, attributedAssetVulns)
+			err = h.AttributionFailureHandler.HandleAttributionFailure(ctx, attributedAssetVulns)
 			return err
 		case domain.AssetInventoryRequestError:
 			logger.Error(logs.AssetInventoryRequestError{Reason: err.Error()})
@@ -40,12 +40,6 @@ func (h *AttributeHandler) Handle(ctx context.Context, assetVulns domain.Nexpose
 			return err
 		}
 	}
-	// In the event an asset gets attributed, and there's now failure, we can check for whether
-	// that attribution is satisfactory, or valid
-	// uncomment the following to add a check...
-	// if !hAttributionFailureHandler.IsValidAttributes(attributedAssetVulns) {
-
-	// }
 	_, err = h.Producer.Produce(ctx, attributedAssetVulns)
 	return err
 }

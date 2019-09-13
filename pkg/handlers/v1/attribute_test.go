@@ -39,8 +39,8 @@ func TestHandle(t *testing.T) {
 		{
 			name:        "asset not found error",
 			output:      domain.NexposeAttributedAssetVulnerabilities{},
-			err:         domain.AssetNotFoundError{},
-			attributeOK: false,
+			err:         nil, // because we "handle" an asset that can't be attributed
+			attributeOK: true,
 		},
 		{
 			name:        "asset inventory request error",
@@ -75,10 +75,11 @@ func TestHandle(t *testing.T) {
 			}
 
 			handler := &AttributeHandler{
-				LogFn:           testLogFn,
-				StatFn:          testStatFn,
-				AssetAttributor: mockAttributor,
-				Producer:        mockProducer,
+				LogFn:                     testLogFn,
+				StatFn:                    testStatFn,
+				AssetAttributor:           mockAttributor,
+				Producer:                  mockProducer,
+				AttributionFailureHandler: mockAttributionFailureHandler(),
 			}
 			err := handler.Handle(context.Background(), input)
 			require.IsType(t, tt.err, err)
