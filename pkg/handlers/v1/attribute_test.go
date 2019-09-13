@@ -39,8 +39,8 @@ func TestHandle(t *testing.T) {
 		{
 			name:        "asset not found error",
 			output:      domain.NexposeAttributedAssetVulnerabilities{},
-			err:         nil, // because we "handle" an asset that can't be attributed
-			attributeOK: true,
+			err:         domain.AssetNotFoundError{},
+			attributeOK: false,
 		},
 		{
 			name:        "asset inventory request error",
