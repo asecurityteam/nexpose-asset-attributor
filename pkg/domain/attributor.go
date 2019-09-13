@@ -87,3 +87,13 @@ func (err AssetInventoryMultipleAssetsFoundError) Error() string {
 		"Request to asset inventory %s returned multiple values for asset with ID %s as of scan time %s: %v",
 		err.AssetInventory, err.AssetID, err.ScanTimestamp, err.Inner)
 }
+
+// IncompleteAttributionHandler is an interface that handles assets that could not be completely
+// attritbuted. The methods to implement might vary user to user
+type IncompleteAttributionHandler interface {
+	// This method checks if attributes are valid or satisfied, returns true if valid, false otherwise
+	IsValidAttributes(asset NexposeAssetVulnerabilities) (bool, error)
+	// This method is left to the discretion of the user. This could mean store an an asset inside a database
+	// or log it, etc.
+	HandleIncompleteAttribution(ctx context.Context, incompleteAttributedAsset NexposeAttributedAssetVulnerabilities) error
+}
