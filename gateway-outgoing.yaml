@@ -209,6 +209,9 @@ components:
             - esp
             - nd
             - raw
+        proof:
+          type: string
+          description: The proof explaining why the result was found vulnerable.
     BusinessContext:
       type: object
       description: The "real world" aspects of the asset helpful for assigning remediations to teams and people.

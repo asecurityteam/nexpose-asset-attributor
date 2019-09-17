@@ -250,3 +250,6 @@ components:
             - esp
             - nd
             - raw
+        proof:
+          type: string
+          description: The proof explaining why the result was found vulnerable.
