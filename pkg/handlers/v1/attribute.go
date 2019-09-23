@@ -49,10 +49,6 @@ func (h *AttributeHandler) Handle(ctx context.Context, assetVulns domain.Nexpose
 		return attributionErr
 	}
 
-	// TODO: check attributedAssetVulns for validation (assignee is email?  ARN is filled?, etc), like pseudo-code:
-	// if (!attributedAssetVulns.isValid()) {
-	//     h.AttributionFailureHandler.HandleAttributionFailure(ctx, attributedAssetVulns)
-	// } else {
 	_, err := h.Producer.Produce(ctx, attributedAssetVulns)
 	return err
 }
