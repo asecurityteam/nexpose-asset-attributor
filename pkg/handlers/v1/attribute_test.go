@@ -54,6 +54,7 @@ func TestHandle(t *testing.T) {
 			err:         domain.AssetInventoryRequestError{},
 			attributeOK: false,
 			AttributionFailureHandlerFunc: func(mockAttributionFailureHandler *MockAttributionFailureHandler) {
+				mockAttributionFailureHandler.EXPECT().HandleAttributionFailure(gomock.Any(), gomock.Any()).Return(nil)
 			},
 		},
 		{
@@ -71,6 +72,7 @@ func TestHandle(t *testing.T) {
 			err:         errors.New("oh noes"),
 			attributeOK: false,
 			AttributionFailureHandlerFunc: func(mockAttributionFailureHandler *MockAttributionFailureHandler) {
+				mockAttributionFailureHandler.EXPECT().HandleAttributionFailure(gomock.Any(), gomock.Any()).Return(nil)
 			},
 		},
 	}

@@ -27,23 +27,20 @@ func (h *AttributeHandler) Handle(ctx context.Context, assetVulns domain.Nexpose
 		switch attributionErr.(type) {
 		case domain.AssetNotFoundError:
 			logger.Error(logs.AssetNotFoundError{Reason: attributionErr.Error()})
-			err := h.AttributionFailureHandler.HandleAttributionFailure(ctx, attributedAssetVulns)
-			if err != nil {
-				return err
-			}
 		case domain.AssetInventoryRequestError:
 			logger.Error(logs.AssetInventoryRequestError{Reason: attributionErr.Error()})
 		case domain.AssetInventoryMultipleAssetsFoundError:
 			logger.Error(logs.AssetInventoryMultipleAssetsFoundError{Reason: attributionErr.Error()})
-			err := h.AttributionFailureHandler.HandleAttributionFailure(ctx, attributedAssetVulns)
-			if err != nil {
-				return err
-			}
 		default:
 			logger.Error(logs.UnknownAttributionFailureError{Reason: attributionErr.Error()})
 		}
+		err := h.AttributionFailureHandler.HandleAttributionFailure(ctx, domain.NexposeAttributedAssetVulnerabilities{NexposeAssetVulnerabilities: assetVulns})
+		if err != nil {
+			return err
+		}
 		return attributionErr
 	}
+
 	_, err := h.Producer.Produce(ctx, attributedAssetVulns)
 	return err
 }
