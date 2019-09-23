@@ -90,11 +90,12 @@ func (n *CloudAssetInventory) Attribute(ctx context.Context, asset domain.Nexpos
 	}
 
 	if asset.IP == "" && asset.Hostname == "" {
-		return domain.NexposeAttributedAssetVulnerabilities{NexposeAssetVulnerabilities: asset}, domain.AssetNotFoundError{
+		return domain.NexposeAttributedAssetVulnerabilities{}, domain.AssetNotFoundError{
 			Inner:          fmt.Errorf("asset has no IP or hostname"),
 			AssetID:        fmt.Sprintf("%d", asset.ID),
 			ScanTimestamp:  asset.LastScanned.Format(time.RFC3339Nano),
 			AssetInventory: cloudAssetInventoryIdentifier,
+			PartialVulns:   domain.NexposeAttributedAssetVulnerabilities{NexposeAssetVulnerabilities: asset},
 		}
 	}
 
@@ -159,7 +160,7 @@ func (n *CloudAssetInventory) Attribute(ctx context.Context, asset domain.Nexpos
 
 	// Exit with an AssetNotFoundError error if both API calls returned non-fatal errors.
 	if len(outerErrs) == 2 {
-		return domain.NexposeAttributedAssetVulnerabilities{NexposeAssetVulnerabilities: asset}, domain.AssetNotFoundError{
+		return domain.NexposeAttributedAssetVulnerabilities{}, domain.AssetNotFoundError{
 			Inner:          combinedError{Errors: outerErrs},
 			AssetID:        fmt.Sprintf("%d", asset.ID),
 			ScanTimestamp:  asset.LastScanned.Format(time.RFC3339Nano),
