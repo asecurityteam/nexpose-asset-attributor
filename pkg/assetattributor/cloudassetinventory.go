@@ -95,7 +95,6 @@ func (n *CloudAssetInventory) Attribute(ctx context.Context, asset domain.Nexpos
 			AssetID:        fmt.Sprintf("%d", asset.ID),
 			ScanTimestamp:  asset.LastScanned.Format(time.RFC3339Nano),
 			AssetInventory: cloudAssetInventoryIdentifier,
-			PartialVulns:   domain.NexposeAttributedAssetVulnerabilities{NexposeAssetVulnerabilities: asset},
 		}
 	}
 
