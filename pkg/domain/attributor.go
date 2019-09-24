@@ -2,7 +2,9 @@ package domain
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
+	"reflect"
 	"time"
 )
 
@@ -25,21 +27,72 @@ type NexposeAssetVulnerabilities struct {
 
 // CloudAssetDetails represent a cloud asset and associated metadata
 type CloudAssetDetails struct {
-	PrivateIPAddresses []string          `json:"privateIPAddresses,omitempty"`
-	PublicIPAddresses  []string          `json:"publicIPAddresses,omitempty"`
-	Hostnames          []string          `json:"hostnames,omitempty"`
-	ResourceType       string            `json:"resourceTypes,omitempty"`
-	AccountID          string            `json:"accountID,omitempty"`
-	Region             string            `json:"region,omitempty"`
-	ARN                string            `json:"arn,omitempty"`
-	Tags               map[string]string `json:"tags,omitempty"`
+	PrivateIPAddresses []string          `json:"privateIPAddresses"`
+	PublicIPAddresses  []string          `json:"publicIPAddresses"`
+	Hostnames          []string          `json:"hostnames"`
+	ResourceType       string            `json:"resourceTypes"`
+	AccountID          string            `json:"accountID"`
+	Region             string            `json:"region"`
+	ARN                string            `json:"arn"`
+	Tags               map[string]string `json:"tags"`
 }
 
 // NexposeAttributedAssetVulnerabilities is a NexposeAssetVulnerabilities instance combined
 // with the business context pertaining to the asset at scan time.
 type NexposeAttributedAssetVulnerabilities struct {
 	NexposeAssetVulnerabilities
-	BusinessContext CloudAssetDetails `json:"businessContext,omitempty"`
+	BusinessContext CloudAssetDetails `json:"businessContext"`
+}
+
+// UnmarshalJSON is a custom unmarshaller to ensure no `nil` or `null` fields in the resulting struct
+func (n *NexposeAttributedAssetVulnerabilities) UnmarshalJSON(data []byte) error {
+	type Alias NexposeAttributedAssetVulnerabilities
+	aux := &struct {
+		*Alias
+	}{
+		Alias: (*Alias)(n),
+	}
+	if err := json.Unmarshal(data, &aux); err != nil {
+		return err
+	}
+	if n.NexposeAssetVulnerabilities.Vulnerabilities == nil {
+		n.NexposeAssetVulnerabilities.Vulnerabilities = make([]AssetVulnerabilityDetails, 0)
+	}
+
+	if reflect.DeepEqual((CloudAssetDetails{}), n.BusinessContext) {
+		if err := json.Unmarshal(data, &n.BusinessContext); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+// UnmarshalJSON is a custom unmarshaller to ensure no `nil` or `null` fields in the resulting struct
+func (n *CloudAssetDetails) UnmarshalJSON(data []byte) error {
+	type Alias CloudAssetDetails
+	aux := &struct {
+		*Alias
+	}{
+		Alias: (*Alias)(n),
+	}
+	if err := json.Unmarshal(data, &aux); err != nil {
+		return err
+	}
+	if n.Hostnames == nil {
+		n.Hostnames = make([]string, 0)
+	}
+	if n.PrivateIPAddresses == nil {
+		n.PrivateIPAddresses = make([]string, 0)
+	}
+	if n.PublicIPAddresses == nil {
+		n.PublicIPAddresses = make([]string, 0)
+	}
+	if n.Tags == nil {
+		n.Tags = make(map[string]string)
+	}
+
+	return nil
 }
 
 // AssetNotFoundError occurs when a request to an asset inventory system
