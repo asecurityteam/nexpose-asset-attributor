@@ -25,21 +25,21 @@ type NexposeAssetVulnerabilities struct {
 
 // CloudAssetDetails represent a cloud asset and associated metadata
 type CloudAssetDetails struct {
-	PrivateIPAddresses []string          `json:"privateIPAddresses"`
-	PublicIPAddresses  []string          `json:"publicIPAddresses"`
-	Hostnames          []string          `json:"hostnames"`
-	ResourceType       string            `json:"resourceTypes"`
-	AccountID          string            `json:"accountID"`
-	Region             string            `json:"region"`
-	ARN                string            `json:"arn"`
-	Tags               map[string]string `json:"tags"`
+	PrivateIPAddresses []string          `json:"privateIPAddresses,omitempty"`
+	PublicIPAddresses  []string          `json:"publicIPAddresses,omitempty"`
+	Hostnames          []string          `json:"hostnames,omitempty"`
+	ResourceType       string            `json:"resourceTypes,omitempty"`
+	AccountID          string            `json:"accountID,omitempty"`
+	Region             string            `json:"region,omitempty"`
+	ARN                string            `json:"arn,omitempty"`
+	Tags               map[string]string `json:"tags,omitempty"`
 }
 
 // NexposeAttributedAssetVulnerabilities is a NexposeAssetVulnerabilities instance combined
 // with the business context pertaining to the asset at scan time.
 type NexposeAttributedAssetVulnerabilities struct {
 	NexposeAssetVulnerabilities
-	BusinessContext CloudAssetDetails `json:"businessContext"`
+	BusinessContext CloudAssetDetails `json:"businessContext,omitempty"`
 }
 
 // AssetNotFoundError occurs when a request to an asset inventory system
