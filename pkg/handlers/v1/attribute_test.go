@@ -20,11 +20,13 @@ func TestHandle(t *testing.T) {
 	}
 
 	tc := []struct {
-		name                          string
-		output                        domain.NexposeAttributedAssetVulnerabilities
-		err                           error
-		attributeOK                   bool
-		AttributionFailureHandlerFunc func(*MockAttributionFailureHandler)
+		name                           string
+		output                         domain.NexposeAttributedAssetVulnerabilities
+		attributedErr                  error
+		attributeAndValidateOK         bool
+		AttributionFailureHandlerFunc  func(*MockAttributionFailureHandler)
+		AttributtedAssetValidationFunc func(*MockAssetValidator)
+		result                         error
 	}{
 		{
 			name: "success",
@@ -34,46 +36,80 @@ func TestHandle(t *testing.T) {
 					Hostnames: []string{"123"},
 				},
 			},
-			err:         nil,
-			attributeOK: true,
+			attributedErr:          nil,
+			attributeAndValidateOK: true,
 			AttributionFailureHandlerFunc: func(mockAttributionFailureHandler *MockAttributionFailureHandler) {
 			},
+			AttributtedAssetValidationFunc: func(mockAssetValidator *MockAssetValidator) {
+				mockAssetValidator.EXPECT().Validate(gomock.Any(), gomock.Any()).Return(nil)
+			},
+			result: nil,
 		},
 		{
-			name:        "asset not found error",
-			output:      domain.NexposeAttributedAssetVulnerabilities{},
-			err:         domain.AssetNotFoundError{},
-			attributeOK: false,
+			name:                   "asset not found error",
+			output:                 domain.NexposeAttributedAssetVulnerabilities{},
+			attributedErr:          domain.AssetNotFoundError{},
+			attributeAndValidateOK: false,
 			AttributionFailureHandlerFunc: func(mockAttributionFailureHandler *MockAttributionFailureHandler) {
 				mockAttributionFailureHandler.EXPECT().HandleAttributionFailure(gomock.Any(), gomock.Any()).Return(nil)
 			},
+			AttributtedAssetValidationFunc: func(mockAssetValidator *MockAssetValidator) {
+			},
+			result: domain.AssetNotFoundError{},
 		},
 		{
-			name:        "asset inventory request error",
-			output:      domain.NexposeAttributedAssetVulnerabilities{},
-			err:         domain.AssetInventoryRequestError{},
-			attributeOK: false,
+			name:                   "asset inventory request error",
+			output:                 domain.NexposeAttributedAssetVulnerabilities{},
+			attributedErr:          domain.AssetInventoryRequestError{},
+			attributeAndValidateOK: false,
 			AttributionFailureHandlerFunc: func(mockAttributionFailureHandler *MockAttributionFailureHandler) {
 				mockAttributionFailureHandler.EXPECT().HandleAttributionFailure(gomock.Any(), gomock.Any()).Return(nil)
 			},
+			AttributtedAssetValidationFunc: func(mockAssetValidator *MockAssetValidator) {
+			},
+			result: domain.AssetInventoryRequestError{},
 		},
 		{
-			name:        "asset inventory multiple assets found error",
-			output:      domain.NexposeAttributedAssetVulnerabilities{},
-			err:         domain.AssetInventoryMultipleAssetsFoundError{},
-			attributeOK: false,
+			name:                   "asset inventory multiple assets found error",
+			output:                 domain.NexposeAttributedAssetVulnerabilities{},
+			attributedErr:          domain.AssetInventoryMultipleAssetsFoundError{},
+			attributeAndValidateOK: false,
 			AttributionFailureHandlerFunc: func(mockAttributionFailureHandler *MockAttributionFailureHandler) {
 				mockAttributionFailureHandler.EXPECT().HandleAttributionFailure(gomock.Any(), gomock.Any()).Return(nil)
 			},
+			AttributtedAssetValidationFunc: func(mockAssetValidator *MockAssetValidator) {
+			},
+			result: domain.AssetInventoryMultipleAssetsFoundError{},
 		},
 		{
-			name:        "unknown attribution failure error",
-			output:      domain.NexposeAttributedAssetVulnerabilities{},
-			err:         errors.New("oh noes"),
-			attributeOK: false,
+			name:                   "unknown attribution failure error",
+			output:                 domain.NexposeAttributedAssetVulnerabilities{},
+			attributedErr:          errors.New("oh noes"),
+			attributeAndValidateOK: false,
 			AttributionFailureHandlerFunc: func(mockAttributionFailureHandler *MockAttributionFailureHandler) {
 				mockAttributionFailureHandler.EXPECT().HandleAttributionFailure(gomock.Any(), gomock.Any()).Return(nil)
 			},
+			AttributtedAssetValidationFunc: func(mockAssetValidator *MockAssetValidator) {
+			},
+			result: errors.New("oh noes"),
+		},
+		{
+			name: "attributed asset validation failure",
+			output: domain.NexposeAttributedAssetVulnerabilities{
+				NexposeAssetVulnerabilities: input,
+				BusinessContext: domain.CloudAssetDetails{
+					Hostnames: []string{"123"},
+				},
+			},
+			attributedErr:          nil,
+			attributeAndValidateOK: false,
+			AttributionFailureHandlerFunc: func(mockAttributionFailureHandler *MockAttributionFailureHandler) {
+				mockAttributionFailureHandler.EXPECT().HandleAttributionFailure(gomock.Any(), gomock.Any()).Return(nil)
+			},
+			AttributtedAssetValidationFunc: func(mockAssetValidator *MockAssetValidator) {
+				mockAssetValidator.EXPECT().Validate(gomock.Any(), gomock.Any()).Return(errors.New("validation error occurred here"))
+			},
+			result: errors.New("validation error occurred here"),
 		},
 	}
 
@@ -83,22 +119,26 @@ func TestHandle(t *testing.T) {
 			defer ctrl.Finish()
 
 			mockAttributor := NewMockAssetAttributor(ctrl)
-			mockAttributor.EXPECT().Attribute(gomock.Any(), gomock.Any()).Return(tt.output, tt.err)
+			mockAttributor.EXPECT().Attribute(gomock.Any(), gomock.Any()).Return(tt.output, tt.attributedErr)
 			mockProducer := NewMockProducer(ctrl)
-			if tt.attributeOK {
+			if tt.attributeAndValidateOK {
 				mockProducer.EXPECT().Produce(gomock.Any(), tt.output).Return(nil, nil)
 			}
 			mockAttributionFailureHandler := NewMockAttributionFailureHandler(ctrl)
+			mockAssetValidator := NewMockAssetValidator(ctrl)
+
 			tt.AttributionFailureHandlerFunc(mockAttributionFailureHandler)
+			tt.AttributtedAssetValidationFunc(mockAssetValidator)
 			handler := &AttributeHandler{
 				LogFn:                     testLogFn,
 				StatFn:                    testStatFn,
 				AssetAttributor:           mockAttributor,
+				AttributedAssetValidator:  mockAssetValidator,
 				Producer:                  mockProducer,
 				AttributionFailureHandler: mockAttributionFailureHandler,
 			}
 			err := handler.Handle(context.Background(), input)
-			require.IsType(t, tt.err, err)
+			require.IsType(t, tt.result, err)
 		})
 	}
 }

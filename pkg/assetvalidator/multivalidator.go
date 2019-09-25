@@ -13,20 +13,16 @@ type MultiAttributtedAssetValidator struct {
 	validators []domain.AssetValidator
 }
 
-// Validate is a noop implementation, this validator will need to do something, and that is something that
-// varies company to company
+// Validate is an implementation that will run multiple validations in a fan out pattern.
+// If any validator fails, then the entire multi validation fails
 func (v *MultiAttributtedAssetValidator) Validate(ctx context.Context, attributedAsset domain.NexposeAttributedAssetVulnerabilities) error {
 
 	validationResults := make(chan error, len(v.validators))
 
 	for _, validationMethod := range v.validators {
 		go func(validator domain.AssetValidator, ctx context.Context, attributedAsset domain.NexposeAttributedAssetVulnerabilities) {
-			err := validator.Validate(ctx, attributedAsset)
-			if err != nil {
-				validationResults <- err
-				return
-			}
-			validationResults <- nil
+			// send back nil or error from Validate, will check results later
+			validationResults <- validator.Validate(ctx, attributedAsset)
 		}(validationMethod, ctx, attributedAsset)
 	}
 
@@ -41,7 +37,6 @@ func (v *MultiAttributtedAssetValidator) Validate(ctx context.Context, attribute
 	if len(errorList) > 0 {
 		return MultiValidatorError{ErrorList: errorList}
 	}
-	// Do the channels need to be closed?
 
 	return nil
 }
