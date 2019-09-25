@@ -2,7 +2,6 @@ package assetvalidator
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/asecurityteam/nexpose-asset-attributor/pkg/domain"
 )
@@ -17,32 +16,29 @@ type MultiAttributtedAssetValidator struct {
 // Validate is a noop implementation, this validator will need to do something, and that is something that
 // varies company to company
 func (v *MultiAttributtedAssetValidator) Validate(ctx context.Context, attributedAsset domain.NexposeAttributedAssetVulnerabilities) error {
-	succeededValidators := make(chan string, len(v.validators))
-	failedValidators := make(chan error, len(v.validators))
+
+	validationResults := make(chan error, len(v.validators))
 
 	for _, validationMethod := range v.validators {
 		go func(validator domain.AssetValidator, ctx context.Context, attributedAsset domain.NexposeAttributedAssetVulnerabilities) {
 			err := validator.Validate(ctx, attributedAsset)
 			if err != nil {
-				failedValidators <- err
+				validationResults <- err
 				return
 			}
-			succeededValidators <- "success!"
+			validationResults <- nil
 		}(validationMethod, ctx, attributedAsset)
 	}
 
 	var errorList []error
 
 	for range v.validators {
-		select {
-		// TODO: what should i even do in this case, do i need this channel?
-		case <-succeededValidators:
-			fmt.Println("fuck yea it works")
-		case err := <-failedValidators:
+		err := <-validationResults
+		if err != nil {
 			errorList = append(errorList, err)
 		}
 	}
-	if len(errorList) != 0 {
+	if len(errorList) > 0 {
 		return MultiValidatorError{ErrorList: errorList}
 	}
 	// Do the channels need to be closed?

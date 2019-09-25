@@ -6,7 +6,6 @@ import "strings"
 // MultiValidatorError keeps track of a list of errors.
 type MultiValidatorError struct {
 	ErrorList []error
-	Type      string
 }
 
 // MultiValidatorError's Error statement will return
