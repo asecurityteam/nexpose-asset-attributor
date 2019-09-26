@@ -59,8 +59,8 @@ require (
 	github.com/rs/zerolog v1.14.3 // indirect
 	github.com/streadway/amqp v0.0.0-20190404075320-75d898a42a94 // indirect
 	github.com/stretchr/testify v1.3.0
-	github.com/uber/jaeger-client-go v2.16.0+incompatible // indirect
-	github.com/uber/jaeger-lib v2.0.0+incompatible // indirect
+	github.com/uber/jaeger-client-go v2.19.0+incompatible // indirect
+	github.com/uber/jaeger-lib v2.2.0+incompatible // indirect
 	golang.org/x/net v0.0.0-20190724013045-ca1201d0de80 // indirect
 	golang.org/x/sys v0.0.0-20190730183949-1393eb018365 // indirect
 	google.golang.org/grpc v1.22.1 // indirect
