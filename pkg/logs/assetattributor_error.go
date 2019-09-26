@@ -28,3 +28,10 @@ type UnknownAttributionFailureError struct {
 	Message string `logevent:"message,default=attribution-failure"`
 	Reason  string `logevent:"reason,default=unknown-attribution-failure"`
 }
+
+// AttributedAssetValidationError occurs when asset attribution fails for
+// on a validation check, specifically from AttributedAssetValidator
+type AttributedAssetValidationError struct {
+	Message string `logevent:"message,default=validation-failure"`
+	Reason  string `logevent:"reason,default=validation-failure"`
+}

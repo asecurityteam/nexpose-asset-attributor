@@ -10,6 +10,7 @@
     - [Configuration](#configuration)
         - [Logging](#logging)
         - [Stats](#stats)
+        - [Attribution Validation and Failure Handling](#validationfailurehandling)
     - [Status](#status)
     - [Contributing](#contributing)
         - [Building And Testing](#building-and-testing)
@@ -104,6 +105,19 @@ Additional resources:
 
 * [serverfull](https://github.com/asecurityteam/serverfull)
 * [serverfull-gateway](https://github.com/asecurityteam/serverfull-gateway)
+
+<a id="markdown-validation-failure" name="validationfailurehandling"></a>
+### Validation and Failure Handling
+
+In the event that when an asset fails to attribute information from a given source,
+or if it has invalid data, it is important that there is logic around handling
+such cases before producing this asset. These cases might vary between operators,
+thus this is a configurable piece.
+
+In order to configure a validator, or a failure handler, one would need to pass
+in implementations of an AssetValidator and AttributionFailureHandler in main.go, which are defined in pkg/domain/validator.go and pkg/domain/attributor.go.
+Depending on how complex these implementations are, one might need to use our
+Settings library to instantiate these implementations.
 
 <a id="markdown-status" name="status"></a>
 ## Status

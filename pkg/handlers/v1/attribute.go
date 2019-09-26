@@ -12,6 +12,7 @@ type AttributeHandler struct {
 	Producer                  domain.Producer
 	AssetAttributor           domain.AssetAttributor
 	AttributionFailureHandler domain.AttributionFailureHandler // used as a generic handler if an asset has incomplete attributes
+	AttributedAssetValidator  domain.AssetValidator
 	LogFn                     domain.LogFn
 	StatFn                    domain.StatFn
 }
@@ -39,6 +40,16 @@ func (h *AttributeHandler) Handle(ctx context.Context, assetVulns domain.Nexpose
 			return err
 		}
 		return attributionErr
+	}
+
+	validationErr := h.AttributedAssetValidator.Validate(ctx, attributedAssetVulns)
+	if validationErr != nil {
+		logger.Error(logs.AttributedAssetValidationError{Reason: validationErr.Error()})
+		err := h.AttributionFailureHandler.HandleAttributionFailure(ctx, attributedAssetVulns)
+		if err != nil {
+			return err
+		}
+		return validationErr
 	}
 
 	_, err := h.Producer.Produce(ctx, attributedAssetVulns)

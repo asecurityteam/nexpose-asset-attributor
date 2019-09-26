@@ -9,6 +9,7 @@ import (
 	producer "github.com/asecurityteam/component-producer"
 	"github.com/asecurityteam/nexpose-asset-attributor/pkg/assetattributionfailure"
 	"github.com/asecurityteam/nexpose-asset-attributor/pkg/assetattributor"
+	"github.com/asecurityteam/nexpose-asset-attributor/pkg/assetvalidator"
 	"github.com/asecurityteam/nexpose-asset-attributor/pkg/domain"
 	v1 "github.com/asecurityteam/nexpose-asset-attributor/pkg/handlers/v1"
 	"github.com/asecurityteam/serverfull"
@@ -58,8 +59,10 @@ func (c *component) New(ctx context.Context, conf *config) (func(context.Context
 		LogFn:           domain.LoggerFromContext,
 		StatFn:          domain.StatFromContext,
 		AssetAttributor: a,
-		// AttributionFailureHandler field is simply a stub, it varies org to org
+		// AttributionFailureHandler and AttributedAssetValidator fields are stubs, as the actual implementations
+		// of these interfaces will likely vary greatly among different operators of this service.
 		AttributionFailureHandler: &assetattributionfailure.NoopAttributionFailureHandler{},
+		AttributedAssetValidator:  &assetvalidator.NoopAttributedAssetValidator{},
 		Producer:                  p,
 	}
 	handlers := map[string]serverfull.Function{
