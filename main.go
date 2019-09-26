@@ -62,7 +62,7 @@ func (c *component) New(ctx context.Context, conf *config) (func(context.Context
 		// AttributionFailureHandler and AttributedAssetValidator fields are stubs, as the actual implementations
 		// of these interfaces will likely vary greatly among different operators of this service.
 		AttributionFailureHandler: &assetattributionfailure.NoopAttributionFailureHandler{},
-		AttributedAssetValidator:  &assetvalidator.NoopAttributeddAssetValidator{},
+		AttributedAssetValidator:  &assetvalidator.NoopAttributedAssetValidator{},
 		Producer:                  p,
 	}
 	handlers := map[string]serverfull.Function{
