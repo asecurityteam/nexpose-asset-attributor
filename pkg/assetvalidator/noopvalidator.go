@@ -7,22 +7,22 @@ import (
 	"github.com/asecurityteam/nexpose-asset-attributor/pkg/domain"
 )
 
-// NoopAttributtedAssetValidator is a noop implementation of AssetValidator
-type NoopAttributtedAssetValidator struct {
+// NoopAttributedAssetValidator is a noop implementation of AssetValidator
+type NoopAttributedAssetValidator struct {
 }
 
 // Validate is a noop implementation, this validator will need to do something, and that is something that
 // varies company to company. For testing purposes, this will not throw an error
-func (*NoopAttributtedAssetValidator) Validate(ctx context.Context, attributedAsset domain.NexposeAttributedAssetVulnerabilities) error {
+func (*NoopAttributedAssetValidator) Validate(ctx context.Context, attributedAsset domain.NexposeAttributedAssetVulnerabilities) error {
 	return nil
 }
 
-// NoopErrorAttributtedAssetValidator is a noop implementation of AssetValidator
-type NoopErrorAttributtedAssetValidator struct {
+// NoopErrorAttributedAssetValidator is a noop implementation of AssetValidator
+type NoopErrorAttributedAssetValidator struct {
 }
 
 // Validate is a noop implementation, this validator will need to do something, and that is something that
 // varies company to company. For testing purposes, this will always throw an error
-func (*NoopErrorAttributtedAssetValidator) Validate(ctx context.Context, attributedAsset domain.NexposeAttributedAssetVulnerabilities) error {
+func (*NoopErrorAttributedAssetValidator) Validate(ctx context.Context, attributedAsset domain.NexposeAttributedAssetVulnerabilities) error {
 	return errors.New("this will always throw an error")
 }

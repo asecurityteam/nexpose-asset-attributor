@@ -6,16 +6,16 @@ import (
 	"github.com/asecurityteam/nexpose-asset-attributor/pkg/domain"
 )
 
-// MultiAttributtedAssetValidator is an implementation of AssetValidator which runs specified multiple validations
+// MultiAttributedAssetValidator is an implementation of AssetValidator which runs specified multiple validations
 // of type AssetValidator. In the event that a company needs different validation checks for an attributed asset, this implementation
 // will handle that
-type MultiAttributtedAssetValidator struct {
+type MultiAttributedAssetValidator struct {
 	validators []domain.AssetValidator
 }
 
 // Validate is an implementation that will run multiple validations in a fan out pattern.
 // If any validator fails, then the entire multi validation fails
-func (v *MultiAttributtedAssetValidator) Validate(ctx context.Context, attributedAsset domain.NexposeAttributedAssetVulnerabilities) error {
+func (v *MultiAttributedAssetValidator) Validate(ctx context.Context, attributedAsset domain.NexposeAttributedAssetVulnerabilities) error {
 
 	validationResults := make(chan error, len(v.validators))
 
