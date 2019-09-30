@@ -45,13 +45,20 @@ func (h *AttributeHandler) Handle(ctx context.Context, assetVulns domain.Nexpose
 	validationErr := h.AttributedAssetValidator.Validate(ctx, attributedAssetVulns)
 	if validationErr != nil {
 		logger.Error(logs.AttributedAssetValidationError{Reason: validationErr.Error()})
-		err := h.AttributionFailureHandler.HandleAttributionFailure(ctx, attributedAssetVulns)
-		if err != nil {
-			return err
+		failureHandlerErr := h.AttributionFailureHandler.HandleAttributionFailure(ctx, attributedAssetVulns)
+		if failureHandlerErr != nil {
+			return failureHandlerErr
 		}
 		return validationErr
 	}
 
-	_, err := h.Producer.Produce(ctx, attributedAssetVulns)
-	return err
+	_, producerErr := h.Producer.Produce(ctx, attributedAssetVulns)
+	if producerErr != nil {
+		failureHandlerErr := h.AttributionFailureHandler.HandleAttributionFailure(ctx, attributedAssetVulns)
+		if failureHandlerErr != nil {
+			return failureHandlerErr
+		}
+	}
+
+	return producerErr
 }
