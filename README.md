@@ -1,6 +1,8 @@
 <a id="markdown-nexpose-asset-attributor" name="nexpose-asset-attributor"></a>
 # nexpose-asset-attributor - Attribute Assets from Nexpose to Teams and People
 [![GoDoc](https://godoc.org/github.com/asecurityteam/nexpose-asset-attributor?status.svg)](https://godoc.org/github.com/asecurityteam/nexpose-asset-attributor)
+[![Build Status](https://travis-ci.com/asecurityteam/nexpose-asset-attributor.png?branch=master)](https://travis-ci.com/asecurityteam/nexpose-asset-attributor)
+[![codecov.io](https://codecov.io/github/asecurityteam/nexpose-asset-attributor/coverage.svg?branch=master)](https://codecov.io/github/asecurityteam/nexpose-asset-attributor?branch=master)
 
 <https://github.com/asecurityteam/nexpose-asset-attributor>
 
