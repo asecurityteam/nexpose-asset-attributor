@@ -93,6 +93,7 @@ func TestHandle(t *testing.T) {
 			},
 			result: errors.New("oh noes"),
 		},
+		// this block should be uncommented/amended during PSD-171
 		// {
 		// 	name: "attributed asset validation failure",
 		// 	output: domain.NexposeAttributedAssetVulnerabilities{
