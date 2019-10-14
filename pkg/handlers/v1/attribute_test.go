@@ -93,24 +93,25 @@ func TestHandle(t *testing.T) {
 			},
 			result: errors.New("oh noes"),
 		},
-		{
-			name: "attributed asset validation failure",
-			output: domain.NexposeAttributedAssetVulnerabilities{
-				NexposeAssetVulnerabilities: input,
-				BusinessContext: domain.CloudAssetDetails{
-					Hostnames: []string{"123"},
-				},
-			},
-			attributedErr:          nil,
-			attributeAndValidateOK: false,
-			AttributionFailureHandlerFunc: func(mockAttributionFailureHandler *MockAttributionFailureHandler) {
-				mockAttributionFailureHandler.EXPECT().HandleAttributionFailure(gomock.Any(), gomock.Any()).Return(nil)
-			},
-			AttributtedAssetValidationFunc: func(mockAssetValidator *MockAssetValidator) {
-				mockAssetValidator.EXPECT().Validate(gomock.Any(), gomock.Any()).Return(errors.New("validation error occurred here"))
-			},
-			result: errors.New("validation error occurred here"),
-		},
+		// this block should be uncommented/amended during PSD-171
+		// {
+		// 	name: "attributed asset validation failure",
+		// 	output: domain.NexposeAttributedAssetVulnerabilities{
+		// 		NexposeAssetVulnerabilities: input,
+		// 		BusinessContext: domain.CloudAssetDetails{
+		// 			Hostnames: []string{"123"},
+		// 		},
+		// 	},
+		// 	attributedErr:          nil,
+		// 	attributeAndValidateOK: false,
+		// 	AttributionFailureHandlerFunc: func(mockAttributionFailureHandler *MockAttributionFailureHandler) {
+		// 		mockAttributionFailureHandler.EXPECT().HandleAttributionFailure(gomock.Any(), gomock.Any()).Return(nil)
+		// 	},
+		// 	AttributtedAssetValidationFunc: func(mockAssetValidator *MockAssetValidator) {
+		// 		mockAssetValidator.EXPECT().Validate(gomock.Any(), gomock.Any()).Return(errors.New("validation error occurred here"))
+		// 	},
+		// 	result: errors.New("validation error occurred here"),
+		// },
 	}
 
 	for _, tt := range tc {
