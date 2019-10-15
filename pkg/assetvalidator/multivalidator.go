@@ -35,6 +35,18 @@ func (v *MultiAttributedAssetValidator) Validate(ctx context.Context, attributed
 		}
 	}
 	if len(errorList) > 0 {
+		var failureList []error
+		for _, err := range errorList {
+			switch err.(type) {
+			case ValidationFailure:
+				failureList = append(failureList, err)
+			default:
+				continue
+			}
+		}
+		if len(failureList) > 0 {
+			return ValidationFailure{FailureList: failureList}
+		}
 		return MultiValidatorError{ErrorList: errorList}
 	}
 

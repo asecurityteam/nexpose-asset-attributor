@@ -49,7 +49,7 @@ func (h *AttributeHandler) Handle(ctx context.Context, assetVulns domain.Nexpose
 		if failureHandlerErr != nil {
 			return failureHandlerErr
 		}
-		return nil
+		return validationErr
 	}
 
 	_, producerErr := h.Producer.Produce(ctx, attributedAssetVulns)

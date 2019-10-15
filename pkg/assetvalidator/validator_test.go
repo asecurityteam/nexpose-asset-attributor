@@ -46,3 +46,14 @@ func TestMultiValidatorMultipleValidatorError(t *testing.T) {
 	result := multiValidator.Validate(ctx, attributedAsset)
 	assert.Equal(t, result.Error(), "\n\nthis will always throw an error\nthis will always throw an error")
 }
+
+func TestMultiValidatorValidationFailure(t *testing.T) {
+	noopValidator1 := NoopAttributedAssetValidator{}
+	noopValidator2 := NoopErrorAttributedAssetValidator{}
+	noopValidator3 := FailureValidator{}
+	ctx := context.Background()
+	multiValidator := MultiAttributedAssetValidator{Validators: []domain.AssetValidator{&noopValidator1, &noopValidator2, &noopValidator3}}
+	attributedAsset := domain.NexposeAttributedAssetVulnerabilities{BusinessContext: domain.CloudAssetDetails{ARN: "invalid attribution"}}
+	result := multiValidator.Validate(ctx, attributedAsset)
+	assert.IsType(t, ValidationFailure{}, result)
+}
