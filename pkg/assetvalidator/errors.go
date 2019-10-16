@@ -3,7 +3,7 @@ package assetvalidator
 import "strings"
 
 // ValidationError occurs when the process of validation fails
-// unexpectantly, and not due to an invalid attributed asset
+// unexpectedly, and not due to an invalid attributed asset
 // Examples of usage would include a bad http call
 type ValidationError struct {
 	ErrorList []error
