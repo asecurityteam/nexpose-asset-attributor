@@ -50,7 +50,7 @@ func (v *MultiAttributedAssetValidator) Validate(ctx context.Context, attributed
 			return ValidationFailure{FailureList: failureList}
 		}
 		// there are no such "failures" in failuresAndErrorsList, only contains "errors"
-		return MultiValidatorError{ErrorList: failuresAndErrorsList}
+		return ValidationError{ErrorList: failuresAndErrorsList}
 	}
 
 	return nil
