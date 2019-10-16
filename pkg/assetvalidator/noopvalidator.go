@@ -34,5 +34,6 @@ type FailureValidator struct {
 // Validate is a noop implementation, this validator will need to do something, and that is something that
 // varies company to company. For testing purposes, this will throw a validation failure error
 func (*FailureValidator) Validate(ctx context.Context, attributedAsset domain.NexposeAttributedAssetVulnerabilities) error {
-	return ValidationFailure{}
+	failuresList := []error{errors.New("invalid asset")}
+	return ValidationFailure{FailureList: failuresList}
 }

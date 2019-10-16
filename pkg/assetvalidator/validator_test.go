@@ -56,4 +56,5 @@ func TestMultiValidatorValidationFailure(t *testing.T) {
 	attributedAsset := domain.NexposeAttributedAssetVulnerabilities{BusinessContext: domain.CloudAssetDetails{ARN: "invalid attribution"}}
 	result := multiValidator.Validate(ctx, attributedAsset)
 	assert.IsType(t, ValidationFailure{}, result)
+	assert.Equal(t, result.Error(), "\n\ninvalid asset")
 }

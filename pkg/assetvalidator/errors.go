@@ -2,8 +2,9 @@ package assetvalidator
 
 import "strings"
 
-// MultiValidatorError occurs when any validation check has an error.
-// MultiValidatorError keeps track of a list of errors.
+// MultiValidatorError occurs when the process of validation fails
+// unexpectantly, and not due to an invalid attributed asset
+// Examples of usage would include a bad http call
 type MultiValidatorError struct {
 	ErrorList []error
 }
@@ -19,9 +20,8 @@ func (mve MultiValidatorError) Error() string {
 	return strings.Join(errstrings, "\n")
 }
 
-// ValidationFailure occurs when the process of validation fails
-// unexpectantly, and not due to an invalid attributed asset
-// Examples of usage would include a bad http call
+// ValidationFailure occurs when any validation check fails
+// validation, in other words an asset is invalid
 type ValidationFailure struct {
 	FailureList []error
 }

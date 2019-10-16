@@ -26,17 +26,19 @@ func (v *MultiAttributedAssetValidator) Validate(ctx context.Context, attributed
 		}(validationMethod, ctx, attributedAsset)
 	}
 
-	var errorList []error
+	var failuresAndErrorsList []error
 
+	// loop through results of every validator. Note that validationResults channel
+	// contains type error, but type error is classified as a "failure" or an "error"(failed unexpectantly)
 	for range v.Validators {
 		err := <-validationResults
 		if err != nil {
-			errorList = append(errorList, err)
+			failuresAndErrorsList = append(failuresAndErrorsList, err)
 		}
 	}
-	if len(errorList) > 0 {
+	if len(failuresAndErrorsList) > 0 {
 		var failureList []error
-		for _, err := range errorList {
+		for _, err := range failuresAndErrorsList {
 			switch err.(type) {
 			case ValidationFailure:
 				failureList = append(failureList, err)
@@ -47,7 +49,8 @@ func (v *MultiAttributedAssetValidator) Validate(ctx context.Context, attributed
 		if len(failureList) > 0 {
 			return ValidationFailure{FailureList: failureList}
 		}
-		return MultiValidatorError{ErrorList: errorList}
+		// there are no such "failures" in failuresAndErrorsList, only contains "errors"
+		return MultiValidatorError{ErrorList: failuresAndErrorsList}
 	}
 
 	return nil
