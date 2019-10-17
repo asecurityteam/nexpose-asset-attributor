@@ -44,7 +44,14 @@ func (h *AttributeHandler) Handle(ctx context.Context, assetVulns domain.Nexpose
 
 	validationErr := h.AttributedAssetValidator.Validate(ctx, attributedAssetVulns)
 	if validationErr != nil {
-		logger.Error(logs.AttributedAssetValidationError{Reason: validationErr.Error()})
+		switch validationErr.(type) {
+		case domain.ValidationFailure:
+			logger.Error(logs.AssetValidationFailure{Reason: validationErr.Error()})
+		case domain.ValidationError:
+		default:
+			logger.Error(logs.AssetValidationError{Reason: validationErr.Error()})
+		}
+
 		failureHandlerErr := h.AttributionFailureHandler.HandleAttributionFailure(ctx, attributedAssetVulns)
 		if failureHandlerErr != nil {
 			return failureHandlerErr

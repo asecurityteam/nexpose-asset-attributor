@@ -2,28 +2,12 @@ package assetvalidator
 
 import "strings"
 
-// ValidationError occurs when the process of validation fails
-// unexpectedly, and not due to an invalid attributed asset
-// Examples of usage would include a bad http call
-type ValidationError struct {
-	ErrorList []error
-}
-
-// ValidationError's Error statement will return
-// a conglomeration of all errors that occurred
-func (ve ValidationError) Error() string {
-	errstrings := make([]string, len(ve.ErrorList))
-
-	for _, err := range ve.ErrorList {
-		errstrings = append(errstrings, err.Error())
-	}
-	return strings.Join(errstrings, "\n")
-}
-
 // ValidationFailure occurs when any validation check fails
 // validation, in other words an asset is invalid
 type ValidationFailure struct {
-	FailureList []error
+	AssetID int64
+	FailedCheck string
+	Inner error
 }
 
 // ValidationFailure's Error statement will return
