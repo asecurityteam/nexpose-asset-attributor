@@ -9,7 +9,7 @@ import (
 // or whether an asset has all "attributes" completely filled
 type AssetValidator interface {
 
-	// AssetValidator is an interface that arbitrarily validates an attributed asset. This validator
+	// AssetValidator is an interface that arbitrarily validates an attributed asset.
 	Validate(ctx context.Context, attributedAsset NexposeAttributedAssetVulnerabilities) error
 }
 
