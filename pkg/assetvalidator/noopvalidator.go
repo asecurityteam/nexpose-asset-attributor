@@ -3,6 +3,7 @@ package assetvalidator
 import (
 	"context"
 	"errors"
+	"fmt"
 
 	"github.com/asecurityteam/nexpose-asset-attributor/pkg/domain"
 )
@@ -24,8 +25,12 @@ type NoopErrorAttributedAssetValidator struct {
 // Validate is a noop implementation, this validator will need to do something, and that is something that
 // varies company to company. For testing purposes, this will always throw an error
 func (*NoopErrorAttributedAssetValidator) Validate(ctx context.Context, attributedAsset domain.NexposeAttributedAssetVulnerabilities) error {
-	errorsList := []error{errors.New("this will always throw an error")}
-	return ValidationError{ErrorList: errorsList}
+	err := errors.New("this will always throw an error")
+	return domain.ValidationError{
+		AssetID:     fmt.Sprintf("%d", attributedAsset.NexposeAssetVulnerabilities.ID),
+		FailedCheck: "validation-error",
+		Inner:       err,
+	}
 }
 
 // FailureValidator is a noop implementation of AssetValidator
@@ -35,6 +40,10 @@ type FailureValidator struct {
 // Validate is a noop implementation, this validator will need to do something, and that is something that
 // varies company to company. For testing purposes, this will throw a validation failure error
 func (*FailureValidator) Validate(ctx context.Context, attributedAsset domain.NexposeAttributedAssetVulnerabilities) error {
-	failuresList := []error{errors.New("invalid asset")}
-	return ValidationFailure{FailureList: failuresList}
+	failure := errors.New("invalid asset")
+	return domain.ValidationFailure{
+		AssetID:     fmt.Sprintf("%d", attributedAsset.NexposeAssetVulnerabilities.ID),
+		FailedCheck: "validation-failures",
+		Inner:       failure,
+	}
 }

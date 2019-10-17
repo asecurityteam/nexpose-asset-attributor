@@ -18,7 +18,7 @@ func (err multiValidationError) Error() string {
 	return fmt.Sprintf("errors: %v", err.Errors)
 }
 
-// MultiValidationFailure represents a collection of validation failures
+// multiValidationFailure represents a collection of validation failures
 // returned by any of the individual AssetValidator implementations
 // used by the MultiValidator.
 type multiValidationFailure struct {
@@ -63,7 +63,7 @@ func (v *MultiAttributedAssetValidator) Validate(ctx context.Context, attributed
 		var failureList []error
 		for _, err := range failuresAndErrorsList {
 			switch err.(type) {
-			case ValidationFailure:
+			case domain.ValidationFailure:
 				failureList = append(failureList, err)
 			default:
 				continue
