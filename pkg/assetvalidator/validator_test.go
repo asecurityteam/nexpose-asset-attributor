@@ -33,7 +33,8 @@ func TestMultiValidatorSingleValidatorError(t *testing.T) {
 	multiValidator := MultiAttributedAssetValidator{Validators: []domain.AssetValidator{&noopValidator}}
 	attributedAsset := domain.NexposeAttributedAssetVulnerabilities{BusinessContext: domain.CloudAssetDetails{ARN: "invalid attribution"}}
 	result := multiValidator.Validate(ctx, attributedAsset)
-	assert.Equal(t, result.Error(), "\nthis will always throw an error")
+	assert.Equal(t, result.Error(), "Error occurred during validation multiple-validation-errors for Asset 0: errors: [Error occurred during validation validation-error for Asset 0: this will always throw an error]")
+	assert.IsType(t, domain.ValidationError{}, result)
 }
 
 func TestMultiValidatorMultipleValidatorError(t *testing.T) {
@@ -44,5 +45,17 @@ func TestMultiValidatorMultipleValidatorError(t *testing.T) {
 	multiValidator := MultiAttributedAssetValidator{Validators: []domain.AssetValidator{&noopValidator1, &noopValidator2, &noopValidator3}}
 	attributedAsset := domain.NexposeAttributedAssetVulnerabilities{BusinessContext: domain.CloudAssetDetails{ARN: "invalid attribution"}}
 	result := multiValidator.Validate(ctx, attributedAsset)
-	assert.Equal(t, result.Error(), "\n\nthis will always throw an error\nthis will always throw an error")
+	assert.Equal(t, result.Error(), "Error occurred during validation multiple-validation-errors for Asset 0: errors: [Error occurred during validation validation-error for Asset 0: this will always throw an error Error occurred during validation validation-error for Asset 0: this will always throw an error]")
+	assert.IsType(t, domain.ValidationError{}, result)
+}
+
+func TestMultiValidatorValidationFailure(t *testing.T) {
+	noopValidator1 := NoopAttributedAssetValidator{}
+	noopValidator2 := NoopErrorAttributedAssetValidator{}
+	noopValidator3 := FailureValidator{}
+	ctx := context.Background()
+	multiValidator := MultiAttributedAssetValidator{Validators: []domain.AssetValidator{&noopValidator1, &noopValidator2, &noopValidator3}}
+	attributedAsset := domain.NexposeAttributedAssetVulnerabilities{BusinessContext: domain.CloudAssetDetails{ARN: "invalid attribution"}}
+	result := multiValidator.Validate(ctx, attributedAsset)
+	assert.IsType(t, domain.ValidationFailure{}, result)
 }

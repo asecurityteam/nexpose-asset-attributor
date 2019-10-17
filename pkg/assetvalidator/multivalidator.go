@@ -2,9 +2,32 @@ package assetvalidator
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/asecurityteam/nexpose-asset-attributor/pkg/domain"
 )
+
+// MultiValidationError represents a collection of errors
+// returned by any of the individual AssetValidator implementations
+// used by the MultiValidator.
+type multiValidationError struct {
+	Errors []error
+}
+
+func (err multiValidationError) Error() string {
+	return fmt.Sprintf("errors: %v", err.Errors)
+}
+
+// multiValidationFailure represents a collection of validation failures
+// returned by any of the individual AssetValidator implementations
+// used by the MultiValidator.
+type multiValidationFailure struct {
+	Failures []error
+}
+
+func (failure multiValidationFailure) Error() string {
+	return fmt.Sprintf("failures: %v", failure.Failures)
+}
 
 // MultiAttributedAssetValidator is an implementation of AssetValidator which runs specified multiple validations
 // of type AssetValidator. In the event that a company needs different validation checks for an attributed asset, this implementation
@@ -26,16 +49,39 @@ func (v *MultiAttributedAssetValidator) Validate(ctx context.Context, attributed
 		}(validationMethod, ctx, attributedAsset)
 	}
 
-	var errorList []error
+	var failuresAndErrorsList []error
 
+	// loop through results of every validator. Note that validationResults channel
+	// contains type error, but type error is classified as a "failure" or an "error"(failed unexpectantly)
 	for range v.Validators {
 		err := <-validationResults
 		if err != nil {
-			errorList = append(errorList, err)
+			failuresAndErrorsList = append(failuresAndErrorsList, err)
 		}
 	}
-	if len(errorList) > 0 {
-		return MultiValidatorError{ErrorList: errorList}
+	if len(failuresAndErrorsList) > 0 {
+		var failureList []error
+		for _, err := range failuresAndErrorsList {
+			switch err.(type) {
+			case domain.ValidationFailure:
+				failureList = append(failureList, err)
+			default:
+				continue
+			}
+		}
+		if len(failureList) > 0 {
+			return domain.ValidationFailure{
+				AssetID:     fmt.Sprintf("%d", attributedAsset.NexposeAssetVulnerabilities.ID),
+				FailedCheck: "multiple-validation-failures",
+				Inner:       multiValidationFailure{Failures: failuresAndErrorsList},
+			}
+		}
+		// there are no such "failures" in failuresAndErrorsList, only contains "errors"
+		return domain.ValidationError{
+			AssetID:     fmt.Sprintf("%d", attributedAsset.NexposeAssetVulnerabilities.ID),
+			FailedCheck: "multiple-validation-errors",
+			Inner:       multiValidationError{Errors: failuresAndErrorsList},
+		}
 	}
 
 	return nil
