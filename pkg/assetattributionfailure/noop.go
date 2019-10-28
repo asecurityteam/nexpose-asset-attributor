@@ -11,6 +11,6 @@ type NoopAttributionFailureHandler struct {
 }
 
 // HandleAttributionFailure is a noop implementation
-func (*NoopAttributionFailureHandler) HandleAttributionFailure(ctx context.Context, failedAttributedAsset domain.NexposeAttributedAssetVulnerabilities) error {
+func (*NoopAttributionFailureHandler) HandleAttributionFailure(ctx context.Context, failedAttributedAsset domain.NexposeAttributedAssetVulnerabilities, failure error) error {
 	return nil
 }

@@ -51,7 +51,7 @@ func TestHandle(t *testing.T) {
 			attributedErr:          domain.AssetNotFoundError{},
 			attributeAndValidateOK: false,
 			AttributionFailureHandlerFunc: func(mockAttributionFailureHandler *MockAttributionFailureHandler) {
-				mockAttributionFailureHandler.EXPECT().HandleAttributionFailure(gomock.Any(), gomock.Any()).Return(nil)
+				mockAttributionFailureHandler.EXPECT().HandleAttributionFailure(gomock.Any(), gomock.Any(), gomock.Any()).Return(nil)
 			},
 			AttributtedAssetValidationFunc: func(mockAssetValidator *MockAssetValidator) {
 			},
@@ -63,7 +63,7 @@ func TestHandle(t *testing.T) {
 			attributedErr:          domain.AssetInventoryRequestError{},
 			attributeAndValidateOK: false,
 			AttributionFailureHandlerFunc: func(mockAttributionFailureHandler *MockAttributionFailureHandler) {
-				mockAttributionFailureHandler.EXPECT().HandleAttributionFailure(gomock.Any(), gomock.Any()).Return(nil)
+				mockAttributionFailureHandler.EXPECT().HandleAttributionFailure(gomock.Any(), gomock.Any(), gomock.Any()).Return(nil)
 			},
 			AttributtedAssetValidationFunc: func(mockAssetValidator *MockAssetValidator) {
 			},
@@ -75,7 +75,7 @@ func TestHandle(t *testing.T) {
 			attributedErr:          domain.AssetInventoryMultipleAssetsFoundError{},
 			attributeAndValidateOK: false,
 			AttributionFailureHandlerFunc: func(mockAttributionFailureHandler *MockAttributionFailureHandler) {
-				mockAttributionFailureHandler.EXPECT().HandleAttributionFailure(gomock.Any(), gomock.Any()).Return(nil)
+				mockAttributionFailureHandler.EXPECT().HandleAttributionFailure(gomock.Any(), gomock.Any(), gomock.Any()).Return(nil)
 			},
 			AttributtedAssetValidationFunc: func(mockAssetValidator *MockAssetValidator) {
 			},
@@ -87,7 +87,7 @@ func TestHandle(t *testing.T) {
 			attributedErr:          errors.New("oh noes"),
 			attributeAndValidateOK: false,
 			AttributionFailureHandlerFunc: func(mockAttributionFailureHandler *MockAttributionFailureHandler) {
-				mockAttributionFailureHandler.EXPECT().HandleAttributionFailure(gomock.Any(), gomock.Any()).Return(nil)
+				mockAttributionFailureHandler.EXPECT().HandleAttributionFailure(gomock.Any(), gomock.Any(), gomock.Any()).Return(nil)
 			},
 			AttributtedAssetValidationFunc: func(mockAssetValidator *MockAssetValidator) {
 			},
@@ -104,7 +104,7 @@ func TestHandle(t *testing.T) {
 			attributedErr:          nil,
 			attributeAndValidateOK: false,
 			AttributionFailureHandlerFunc: func(mockAttributionFailureHandler *MockAttributionFailureHandler) {
-				mockAttributionFailureHandler.EXPECT().HandleAttributionFailure(gomock.Any(), gomock.Any()).Return(nil)
+				mockAttributionFailureHandler.EXPECT().HandleAttributionFailure(gomock.Any(), gomock.Any(), gomock.Any()).Return(nil)
 			},
 			AttributtedAssetValidationFunc: func(mockAssetValidator *MockAssetValidator) {
 				mockAssetValidator.EXPECT().Validate(gomock.Any(), gomock.Any()).Return(errors.New("validation error occurred here"))

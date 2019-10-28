@@ -147,5 +147,5 @@ type AttributionFailureHandler interface {
 	// This method is left to the discretion of the organization. For example, we may want to store their attribution failures encrypted
 	// in a persistent store, while others may want to persist theirs in a long-lived encrypted queue, or rely on a streaming platform
 	// like Kafka to keep the data until it can be investigated.
-	HandleAttributionFailure(ctx context.Context, failedAttributedAsset NexposeAttributedAssetVulnerabilities) error
+	HandleAttributionFailure(ctx context.Context, failedAttributedAsset NexposeAttributedAssetVulnerabilities, failure error) error
 }
