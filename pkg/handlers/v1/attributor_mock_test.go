@@ -37,7 +37,6 @@ func (m *MockAssetAttributor) EXPECT() *MockAssetAttributorMockRecorder {
 
 // Attribute mocks base method
 func (m *MockAssetAttributor) Attribute(ctx context.Context, asset domain.NexposeAssetVulnerabilities) (domain.NexposeAttributedAssetVulnerabilities, error) {
-	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Attribute", ctx, asset)
 	ret0, _ := ret[0].(domain.NexposeAttributedAssetVulnerabilities)
 	ret1, _ := ret[1].(error)
@@ -46,7 +45,6 @@ func (m *MockAssetAttributor) Attribute(ctx context.Context, asset domain.Nexpos
 
 // Attribute indicates an expected call of Attribute
 func (mr *MockAssetAttributorMockRecorder) Attribute(ctx, asset interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Attribute", reflect.TypeOf((*MockAssetAttributor)(nil).Attribute), ctx, asset)
 }
 
@@ -74,15 +72,13 @@ func (m *MockAttributionFailureHandler) EXPECT() *MockAttributionFailureHandlerM
 }
 
 // HandleAttributionFailure mocks base method
-func (m *MockAttributionFailureHandler) HandleAttributionFailure(ctx context.Context, failedAttributedAsset domain.NexposeAttributedAssetVulnerabilities) error {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "HandleAttributionFailure", ctx, failedAttributedAsset)
+func (m *MockAttributionFailureHandler) HandleAttributionFailure(ctx context.Context, failedAttributedAsset domain.NexposeAttributedAssetVulnerabilities, failure error) error {
+	ret := m.ctrl.Call(m, "HandleAttributionFailure", ctx, failedAttributedAsset, failure)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
 // HandleAttributionFailure indicates an expected call of HandleAttributionFailure
-func (mr *MockAttributionFailureHandlerMockRecorder) HandleAttributionFailure(ctx, failedAttributedAsset interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "HandleAttributionFailure", reflect.TypeOf((*MockAttributionFailureHandler)(nil).HandleAttributionFailure), ctx, failedAttributedAsset)
+func (mr *MockAttributionFailureHandlerMockRecorder) HandleAttributionFailure(ctx, failedAttributedAsset, failure interface{}) *gomock.Call {
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "HandleAttributionFailure", reflect.TypeOf((*MockAttributionFailureHandler)(nil).HandleAttributionFailure), ctx, failedAttributedAsset, failure)
 }

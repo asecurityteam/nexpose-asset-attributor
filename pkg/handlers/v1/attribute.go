@@ -35,7 +35,7 @@ func (h *AttributeHandler) Handle(ctx context.Context, assetVulns domain.Nexpose
 		default:
 			logger.Error(logs.UnknownAttributionFailureError{Reason: attributionErr.Error()})
 		}
-		err := h.AttributionFailureHandler.HandleAttributionFailure(ctx, domain.NexposeAttributedAssetVulnerabilities{NexposeAssetVulnerabilities: assetVulns})
+		err := h.AttributionFailureHandler.HandleAttributionFailure(ctx, domain.NexposeAttributedAssetVulnerabilities{NexposeAssetVulnerabilities: assetVulns}, attributionErr)
 		if err != nil {
 			return err
 		}
@@ -52,7 +52,7 @@ func (h *AttributeHandler) Handle(ctx context.Context, assetVulns domain.Nexpose
 			logger.Error(logs.AssetValidationError{Reason: validationErr.Error()})
 		}
 
-		failureHandlerErr := h.AttributionFailureHandler.HandleAttributionFailure(ctx, attributedAssetVulns)
+		failureHandlerErr := h.AttributionFailureHandler.HandleAttributionFailure(ctx, attributedAssetVulns, validationErr)
 		if failureHandlerErr != nil {
 			return failureHandlerErr
 		}
@@ -61,7 +61,7 @@ func (h *AttributeHandler) Handle(ctx context.Context, assetVulns domain.Nexpose
 
 	_, producerErr := h.Producer.Produce(ctx, attributedAssetVulns)
 	if producerErr != nil {
-		failureHandlerErr := h.AttributionFailureHandler.HandleAttributionFailure(ctx, attributedAssetVulns)
+		failureHandlerErr := h.AttributionFailureHandler.HandleAttributionFailure(ctx, attributedAssetVulns, producerErr)
 		if failureHandlerErr != nil {
 			return failureHandlerErr
 		}
