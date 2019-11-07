@@ -71,14 +71,12 @@ func (v *MultiAttributedAssetValidator) Validate(ctx context.Context, attributed
 		}
 		if len(failureList) > 0 {
 			return domain.ValidationFailure{
-				AssetID:     fmt.Sprintf("%d", attributedAsset.NexposeAssetVulnerabilities.ID),
 				FailedCheck: "multiple-validation-failures",
 				Inner:       multiValidationFailure{Failures: failuresAndErrorsList},
 			}
 		}
 		// there are no such "failures" in failuresAndErrorsList, only contains "errors"
 		return domain.ValidationError{
-			AssetID:     fmt.Sprintf("%d", attributedAsset.NexposeAssetVulnerabilities.ID),
 			FailedCheck: "multiple-validation-errors",
 			Inner:       multiValidationError{Errors: failuresAndErrorsList},
 		}

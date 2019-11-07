@@ -3,7 +3,6 @@ package assetvalidator
 import (
 	"context"
 	"errors"
-	"fmt"
 
 	"github.com/asecurityteam/nexpose-asset-attributor/pkg/domain"
 )
@@ -27,7 +26,6 @@ type NoopErrorAttributedAssetValidator struct {
 func (*NoopErrorAttributedAssetValidator) Validate(ctx context.Context, attributedAsset domain.NexposeAttributedAssetVulnerabilities) error {
 	err := errors.New("this will always throw an error")
 	return domain.ValidationError{
-		AssetID:     fmt.Sprintf("%d", attributedAsset.NexposeAssetVulnerabilities.ID),
 		FailedCheck: "validation-error",
 		Inner:       err,
 	}
@@ -42,7 +40,6 @@ type FailureValidator struct {
 func (*FailureValidator) Validate(ctx context.Context, attributedAsset domain.NexposeAttributedAssetVulnerabilities) error {
 	failure := errors.New("invalid asset")
 	return domain.ValidationFailure{
-		AssetID:     fmt.Sprintf("%d", attributedAsset.NexposeAssetVulnerabilities.ID),
 		FailedCheck: "validation-failures",
 		Inner:       failure,
 	}
