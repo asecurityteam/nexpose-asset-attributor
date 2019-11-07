@@ -46,10 +46,10 @@ func (h *AttributeHandler) Handle(ctx context.Context, assetVulns domain.Nexpose
 	if validationErr != nil {
 		switch validationErr.(type) {
 		case domain.ValidationFailure:
-			logger.Error(logs.AssetValidationFailure{Reason: validationErr.Error()})
+			logger.Error(logs.AssetValidationFailure{Reason: validationErr.Error(), AssetID: assetVulns.ID})
 		case domain.ValidationError:
 		default:
-			logger.Error(logs.AssetValidationError{Reason: validationErr.Error()})
+			logger.Error(logs.AssetValidationError{Reason: validationErr.Error(), AssetID: assetVulns.ID})
 		}
 
 		failureHandlerErr := h.AttributionFailureHandler.HandleAttributionFailure(ctx, attributedAssetVulns, validationErr)
