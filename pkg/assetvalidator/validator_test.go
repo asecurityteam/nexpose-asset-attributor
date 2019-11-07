@@ -33,7 +33,7 @@ func TestMultiValidatorSingleValidatorError(t *testing.T) {
 	multiValidator := MultiAttributedAssetValidator{Validators: []domain.AssetValidator{&noopValidator}}
 	attributedAsset := domain.NexposeAttributedAssetVulnerabilities{BusinessContext: domain.CloudAssetDetails{ARN: "invalid attribution"}}
 	result := multiValidator.Validate(ctx, attributedAsset)
-	assert.Equal(t, result.Error(), "Error occurred during validation multiple-validation-errors for Asset 0: errors: [Error occurred during validation validation-error for Asset 0: this will always throw an error]")
+	assert.Equal(t, result.Error(), "Error occurred during validation multiple-validation-errors: errors: [Error occurred during validation validation-error: this will always throw an error]")
 	assert.IsType(t, domain.ValidationError{}, result)
 }
 
@@ -45,7 +45,7 @@ func TestMultiValidatorMultipleValidatorError(t *testing.T) {
 	multiValidator := MultiAttributedAssetValidator{Validators: []domain.AssetValidator{&noopValidator1, &noopValidator2, &noopValidator3}}
 	attributedAsset := domain.NexposeAttributedAssetVulnerabilities{BusinessContext: domain.CloudAssetDetails{ARN: "invalid attribution"}}
 	result := multiValidator.Validate(ctx, attributedAsset)
-	assert.Equal(t, result.Error(), "Error occurred during validation multiple-validation-errors for Asset 0: errors: [Error occurred during validation validation-error for Asset 0: this will always throw an error Error occurred during validation validation-error for Asset 0: this will always throw an error]")
+	assert.Equal(t, result.Error(), "Error occurred during validation multiple-validation-errors: errors: [Error occurred during validation validation-error: this will always throw an error Error occurred during validation validation-error: this will always throw an error]")
 	assert.IsType(t, domain.ValidationError{}, result)
 }
 
