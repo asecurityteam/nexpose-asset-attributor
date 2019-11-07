@@ -27,13 +27,13 @@ func (h *AttributeHandler) Handle(ctx context.Context, assetVulns domain.Nexpose
 	if attributionErr != nil {
 		switch attributionErr.(type) {
 		case domain.AssetNotFoundError:
-			logger.Error(logs.AssetNotFoundError{Reason: attributionErr.Error()})
+			logger.Error(logs.AssetNotFoundError{Reason: attributionErr.Error(), AssetID: assetVulns.ID})
 		case domain.AssetInventoryRequestError:
-			logger.Error(logs.AssetInventoryRequestError{Reason: attributionErr.Error()})
+			logger.Error(logs.AssetInventoryRequestError{Reason: attributionErr.Error(), AssetID: assetVulns.ID})
 		case domain.AssetInventoryMultipleAssetsFoundError:
-			logger.Error(logs.AssetInventoryMultipleAssetsFoundError{Reason: attributionErr.Error()})
+			logger.Error(logs.AssetInventoryMultipleAssetsFoundError{Reason: attributionErr.Error(), AssetID: assetVulns.ID})
 		default:
-			logger.Error(logs.UnknownAttributionFailureError{Reason: attributionErr.Error()})
+			logger.Error(logs.UnknownAttributionFailureError{Reason: attributionErr.Error(), AssetID: assetVulns.ID})
 		}
 		err := h.AttributionFailureHandler.HandleAttributionFailure(ctx, domain.NexposeAttributedAssetVulnerabilities{NexposeAssetVulnerabilities: assetVulns}, attributionErr)
 		if err != nil {
