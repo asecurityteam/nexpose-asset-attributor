@@ -85,7 +85,7 @@ type CloudAssetInventory struct {
 // Attribute queries the asecurityteam/asset-inventory-api service first by IP, then by hostname
 // if the first query returns no results
 func (n *CloudAssetInventory) Attribute(ctx context.Context, asset domain.NexposeAssetVulnerabilities) (domain.NexposeAttributedAssetVulnerabilities, error) {
-	if asset.LastScanned.IsZero() {
+	if asset.ScanTime.IsZero() {
 		return domain.NexposeAttributedAssetVulnerabilities{}, fmt.Errorf("no valid timestamp in scan history")
 	}
 
@@ -93,7 +93,7 @@ func (n *CloudAssetInventory) Attribute(ctx context.Context, asset domain.Nexpos
 		return domain.NexposeAttributedAssetVulnerabilities{}, domain.AssetNotFoundError{
 			Inner:          fmt.Errorf("asset has no IP or hostname"),
 			AssetID:        fmt.Sprintf("%d", asset.ID),
-			ScanTimestamp:  asset.LastScanned.Format(time.RFC3339Nano),
+			ScanTimestamp:  asset.ScanTime.Format(time.RFC3339Nano),
 			AssetInventory: cloudAssetInventoryIdentifier,
 		}
 	}
@@ -109,7 +109,7 @@ func (n *CloudAssetInventory) Attribute(ctx context.Context, asset domain.Nexpos
 		wg.Add(1)
 		go func() {
 			defer wg.Done()
-			assetDetails, err := n.fetchAsset(ctx, resourcePathTypeIP, asset.IP, asset.LastScanned)
+			assetDetails, err := n.fetchAsset(ctx, resourcePathTypeIP, asset.IP, asset.ScanTime)
 			if err != nil {
 				errChan <- err
 				return
@@ -122,7 +122,7 @@ func (n *CloudAssetInventory) Attribute(ctx context.Context, asset domain.Nexpos
 		wg.Add(1)
 		go func() {
 			defer wg.Done()
-			assetDetails, err := n.fetchAsset(ctx, resourcePathTypeHostname, asset.Hostname, asset.LastScanned)
+			assetDetails, err := n.fetchAsset(ctx, resourcePathTypeHostname, asset.Hostname, asset.ScanTime)
 			if err != nil {
 				errChan <- err
 				return
@@ -142,14 +142,14 @@ func (n *CloudAssetInventory) Attribute(ctx context.Context, asset domain.Nexpos
 			return domain.NexposeAttributedAssetVulnerabilities{}, domain.AssetInventoryMultipleAssetsFoundError{
 				Inner:          e,
 				AssetID:        fmt.Sprintf("%d", asset.ID),
-				ScanTimestamp:  asset.LastScanned.Format(time.RFC3339Nano),
+				ScanTimestamp:  asset.ScanTime.Format(time.RFC3339Nano),
 				AssetInventory: cloudAssetInventoryIdentifier,
 			}
 		case httpBadRequest:
 			return domain.NexposeAttributedAssetVulnerabilities{}, domain.AssetInventoryRequestError{
 				Inner:          e,
 				AssetID:        fmt.Sprintf("%d", asset.ID),
-				ScanTimestamp:  asset.LastScanned.Format(time.RFC3339Nano),
+				ScanTimestamp:  asset.ScanTime.Format(time.RFC3339Nano),
 				AssetInventory: cloudAssetInventoryIdentifier,
 				Code:           http.StatusBadRequest,
 			}
@@ -162,7 +162,7 @@ func (n *CloudAssetInventory) Attribute(ctx context.Context, asset domain.Nexpos
 		return domain.NexposeAttributedAssetVulnerabilities{}, domain.AssetNotFoundError{
 			Inner:          combinedError{Errors: outerErrs},
 			AssetID:        fmt.Sprintf("%d", asset.ID),
-			ScanTimestamp:  asset.LastScanned.Format(time.RFC3339Nano),
+			ScanTimestamp:  asset.ScanTime.Format(time.RFC3339Nano),
 			AssetInventory: cloudAssetInventoryIdentifier,
 		}
 	}

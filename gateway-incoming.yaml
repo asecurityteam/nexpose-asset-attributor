@@ -127,7 +127,6 @@ components:
       required:
         - id
         - ip
-        - lastScanned
         - assetVulnerabilityDetails
       properties:
         id:
@@ -143,6 +142,10 @@ components:
           type: string
           format: date-time
           description: The last time the asset was scanned.
+        scanTime:
+          type: string
+          format: date-time
+          description: The time the asset was scanned.
         assetVulnerabilityDetails:
           type: array
           description: List of vulnerabilities found on the asset.
@@ -153,7 +156,6 @@ components:
       required:
         - id
         - hostname
-        - lastScanned
         - assetVulnerabilityDetails
       properties:
         id:
@@ -169,6 +171,10 @@ components:
           type: string
           format: date-time
           description: The last time the asset was scanned.
+       scanTime:
+          type: string
+          format: date-time
+          description: The time the asset was scanned.
         assetVulnerabilityDetails:
           type: array
           description: List of vulnerabilities found on the asset.

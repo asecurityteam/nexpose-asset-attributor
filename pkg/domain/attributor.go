@@ -19,6 +19,7 @@ type AssetAttributor interface {
 // with assetVulnerabilityDetails
 type NexposeAssetVulnerabilities struct {
 	LastScanned     time.Time                   `json:"lastScanned"`
+	ScanTime        time.Time                   `json:"scanTime"`
 	Hostname        string                      `json:"hostname"`
 	ID              int64                       `json:"id"`
 	IP              string                      `json:"ip"`
