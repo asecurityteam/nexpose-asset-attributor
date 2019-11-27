@@ -16,7 +16,7 @@ func TestCustomUnmarshallingFull(t *testing.T) {
 	expectedLastScanned, _ := time.Parse(time.RFC3339Nano, "2019-09-24 18:10:25.19942 -0500 CDT")
 	expectedLastScannedString := expectedLastScanned.Format(time.RFC3339Nano)
 
-	b := []byte(fmt.Sprintf(`{"lastScanned":"%s","hostname":"bowser","id":1,"ip":"9.8.7.6","assetVulnerabilityDetails":[{"id":"a","results":[{"port":3,"protocol":"udp","proof":"I said it"}],"status":"done","cvssV2Score":42,"cvssV2Severity":"uhh, low","description":"it's bad, you know","title":"title here","solutions":["solution"]}],"businessContext":{"privateIPAddresses":["some_private_ip_address"],"publicIPAddresses":["some_public_ip_address"],"hostnames":["some_hostname"],"resourceTypes":"rtype","accountID":"accountId","region":"north","arn":"an_arn","tags":{"tag1":"value1"}}}`, expectedLastScannedString))
+	b := []byte(fmt.Sprintf(`{"scanTime":"%s","hostname":"bowser","id":1,"ip":"9.8.7.6","assetVulnerabilityDetails":[{"id":"a","results":[{"port":3,"protocol":"udp","proof":"I said it"}],"status":"done","cvssV2Score":42,"cvssV2Severity":"uhh, low","description":"it's bad, you know","title":"title here","solutions":["solution"]}],"businessContext":{"privateIPAddresses":["some_private_ip_address"],"publicIPAddresses":["some_public_ip_address"],"hostnames":["some_hostname"],"resourceTypes":"rtype","accountID":"accountId","region":"north","arn":"an_arn","tags":{"tag1":"value1"}}}`, expectedLastScannedString))
 	partial := NexposeAttributedAssetVulnerabilities{}
 	err := json.Unmarshal(b, &partial)
 	require.Nil(t, err)
@@ -46,7 +46,7 @@ func TestCustomUnmarshallingFull(t *testing.T) {
 	expectedNested := NexposeAssetVulnerabilities{
 		ID:              1,
 		Hostname:        "bowser",
-		LastScanned:     expectedLastScanned,
+		ScanTime:        expectedLastScanned,
 		IP:              "9.8.7.6",
 		Vulnerabilities: expectedNestedAssetVulnerabilityDetails,
 	}

@@ -101,10 +101,10 @@ func TestCloudAssetInventory_Attribute(t *testing.T) {
 		{
 			name: "success",
 			asset: domain.NexposeAssetVulnerabilities{
-				ID:          1,
-				LastScanned: testTimestamp,
-				IP:          testIP,
-				Hostname:    testHostname,
+				ID:       1,
+				ScanTime: testTimestamp,
+				IP:       testIP,
+				Hostname: testHostname,
 			},
 			resps: []cloudAssetInventoryResponse{
 				{
@@ -125,10 +125,10 @@ func TestCloudAssetInventory_Attribute(t *testing.T) {
 		{
 			name: "bad request error",
 			asset: domain.NexposeAssetVulnerabilities{
-				ID:          1,
-				LastScanned: testTimestamp,
-				IP:          testIP,
-				Hostname:    testHostname,
+				ID:       1,
+				ScanTime: testTimestamp,
+				IP:       testIP,
+				Hostname: testHostname,
 			},
 			resps: []cloudAssetInventoryResponse{
 				{},
@@ -145,10 +145,10 @@ func TestCloudAssetInventory_Attribute(t *testing.T) {
 		{
 			name: "multiple assets error",
 			asset: domain.NexposeAssetVulnerabilities{
-				ID:          1,
-				LastScanned: testTimestamp,
-				IP:          testIP,
-				Hostname:    testHostname,
+				ID:       1,
+				ScanTime: testTimestamp,
+				IP:       testIP,
+				Hostname: testHostname,
 			},
 			resps: []cloudAssetInventoryResponse{
 				{
@@ -170,10 +170,10 @@ func TestCloudAssetInventory_Attribute(t *testing.T) {
 		{
 			name: "multiple non-fatal errors",
 			asset: domain.NexposeAssetVulnerabilities{
-				ID:          1,
-				LastScanned: testTimestamp,
-				IP:          testIP,
-				Hostname:    testHostname,
+				ID:       1,
+				ScanTime: testTimestamp,
+				IP:       testIP,
+				Hostname: testHostname,
 			},
 			resps: []cloudAssetInventoryResponse{
 				{},
@@ -216,10 +216,10 @@ func TestCloudAssetInventory_Attribute_InvalidAssetTimestamp(t *testing.T) {
 	}
 
 	testAsset := domain.NexposeAssetVulnerabilities{
-		ID:          1,
-		LastScanned: time.Time{},
-		IP:          testIP,
-		Hostname:    testHostname,
+		ID:       1,
+		ScanTime: time.Time{},
+		IP:       testIP,
+		Hostname: testHostname,
 	}
 	_, err := attributor.Attribute(context.Background(), testAsset)
 	require.Error(t, err)
@@ -237,8 +237,8 @@ func TestCloudAssetInventory_Attribute_NoHostnameOrIP(t *testing.T) {
 	}
 
 	testAsset := domain.NexposeAssetVulnerabilities{
-		ID:          1,
-		LastScanned: time.Date(2019, time.April, 22, 15, 2, 44, 0, time.UTC),
+		ID:       1,
+		ScanTime: time.Date(2019, time.April, 22, 15, 2, 44, 0, time.UTC),
 	}
 
 	_, err := attributor.Attribute(context.Background(), testAsset)
