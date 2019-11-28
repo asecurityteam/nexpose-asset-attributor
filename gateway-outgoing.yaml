@@ -127,7 +127,7 @@ components:
         scanTime:
           type: string
           format: date-time
-          description: The time the asset was scanned.
+          description: The time the asset was scanned in ISO8601 format.
         assetVulnerabilityDetails:
           type: array
           description: List of vulnerabilities found on the asset.
@@ -276,7 +276,7 @@ components:
         scanTime:
           type: string
           format: date-time
-          description: The time the asset was scanned.
+          description: The time the asset was scanned in ISO8601 format.
         assetVulnerabilityDetails:
           type: array
           description: List of vulnerabilities found on the asset.
@@ -304,7 +304,7 @@ components:
         scanTime:
           type: string
           format: date-time
-          description: The time the asset was scanned.
+          description: The time the asset was scanned in ISO8601 format.
         assetVulnerabilityDetails:
           type: array
           description: List of vulnerabilities found on the asset.
