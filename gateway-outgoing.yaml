@@ -108,6 +108,7 @@ components:
       required:
         - id
         - ip
+        - scanTime
         - assetVulnerabilityDetails
       properties:
         hostname:
@@ -123,14 +124,10 @@ components:
           type: string
           example: 182.34.74.202
           description: The primary IPv4 or IPv6 address of the asset.
-        lastScanned:
-          type: string
-          format: date-time
-          description: The last time the asset was scanned.
         scanTime:
           type: string
           format: date-time
-          description: The time the asset was scanned.
+          description: The time the asset was scanned in ISO8601 format.
         assetVulnerabilityDetails:
           type: array
           description: List of vulnerabilities found on the asset.
@@ -264,6 +261,7 @@ components:
       required:
         - id
         - ip
+        - scanTime
         - assetVulnerabilityDetails
       properties:
         id:
@@ -275,14 +273,10 @@ components:
           type: string
           example: 182.34.74.202
           description: The primary IPv4 or IPv6 address of the asset.
-        lastScanned:
-          type: string
-          format: date-time
-          description: The last time the asset was scanned.
         scanTime:
           type: string
           format: date-time
-          description: The time the asset was scanned.
+          description: The time the asset was scanned in ISO8601 format.
         assetVulnerabilityDetails:
           type: array
           description: List of vulnerabilities found on the asset.
@@ -295,6 +289,7 @@ components:
       required:
         - id
         - hostname
+        - scanTime
         - assetVulnerabilityDetails
       properties:
         id:
@@ -306,14 +301,10 @@ components:
           type: string
           example: corporate-workstation-1102DC.acme.com
           description: The primary host name (local or FQDN) of the asset.
-        lastScanned:
-          type: string
-          format: date-time
-          description: The last time the asset was scanned.
         scanTime:
           type: string
           format: date-time
-          description: The time the asset was scanned.
+          description: The time the asset was scanned in ISO8601 format.
         assetVulnerabilityDetails:
           type: array
           description: List of vulnerabilities found on the asset.

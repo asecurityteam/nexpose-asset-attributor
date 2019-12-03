@@ -18,7 +18,6 @@ type AssetAttributor interface {
 // NexposeAssetVulnerabilities is a Nexpose asset response payload appended
 // with assetVulnerabilityDetails
 type NexposeAssetVulnerabilities struct {
-	LastScanned     time.Time                   `json:"lastScanned"`
 	ScanTime        time.Time                   `json:"scanTime"`
 	Hostname        string                      `json:"hostname"`
 	ID              int64                       `json:"id"`
