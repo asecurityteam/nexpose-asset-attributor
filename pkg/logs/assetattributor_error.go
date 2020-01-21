@@ -32,3 +32,12 @@ type UnknownAttributionFailureError struct {
 	Reason  string `logevent:"reason,default=unknown-attribution-failure"`
 	AssetID int64  `logevent:"assetID,default=id-not-specified"`
 }
+
+// AssetInventoryMultipleAttributionErrors occurs when asset attribution fails due to
+// multiple sources of attribution. This error occurs as a result of a combination of the
+// above errors
+type AssetInventoryMultipleAttributionErrors struct {
+	Message string `logevent:"message,default=attribution-failure"`
+	Reason  string `logevent:"reason,default=asset-could-not-attribute-on-sources"`
+	AssetID int64  `logevent:"assetID,default=id-not-specified"`
+}

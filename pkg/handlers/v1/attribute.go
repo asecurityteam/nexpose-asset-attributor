@@ -32,6 +32,8 @@ func (h *AttributeHandler) Handle(ctx context.Context, assetVulns domain.Nexpose
 			logger.Error(logs.AssetInventoryRequestError{Reason: attributionErr.Error(), AssetID: assetVulns.ID})
 		case domain.AssetInventoryMultipleAssetsFoundError:
 			logger.Error(logs.AssetInventoryMultipleAssetsFoundError{Reason: attributionErr.Error(), AssetID: assetVulns.ID})
+		case domain.AssetInventoryMultipleAttributionErrors:
+			logger.Error(logs.AssetInventoryMultipleAttributionErrors{Reason: attributionErr.Error(), AssetID: assetVulns.ID})
 		default:
 			logger.Error(logs.UnknownAttributionFailureError{Reason: attributionErr.Error(), AssetID: assetVulns.ID})
 		}

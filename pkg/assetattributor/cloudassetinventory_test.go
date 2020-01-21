@@ -181,7 +181,7 @@ func TestCloudAssetInventory_Attribute(t *testing.T) {
 			},
 			respCodes:   []int{http.StatusNotFound, http.StatusNotFound},
 			errExpected: true,
-			err:         domain.AssetNotFoundError{},
+			err:         domain.AssetInventoryMultipleAttributionErrors{},
 		},
 	}
 

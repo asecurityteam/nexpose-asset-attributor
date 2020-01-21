@@ -157,13 +157,12 @@ func (n *CloudAssetInventory) Attribute(ctx context.Context, asset domain.Nexpos
 		outerErrs = append(outerErrs, e)
 	}
 
-	// Exit with an AssetNotFoundError error if both API calls returned non-fatal errors.
+	// Exit with an AssetInventoryMultipleAttributionErrors error if both API calls returned non-fatal errors.
 	if len(outerErrs) == 2 {
-		return domain.NexposeAttributedAssetVulnerabilities{}, domain.AssetNotFoundError{
-			Inner:          combinedError{Errors: outerErrs},
-			AssetID:        fmt.Sprintf("%d", asset.ID),
-			ScanTimestamp:  asset.ScanTime.Format(time.RFC3339Nano),
-			AssetInventory: cloudAssetInventoryIdentifier,
+		return domain.NexposeAttributedAssetVulnerabilities{}, domain.AssetInventoryMultipleAttributionErrors{
+			Inner:         combinedError{Errors: outerErrs},
+			AssetID:       fmt.Sprintf("%d", asset.ID),
+			ScanTimestamp: asset.ScanTime.Format(time.RFC3339Nano),
 		}
 	}
 

@@ -141,6 +141,20 @@ func (err AssetInventoryMultipleAssetsFoundError) Error() string {
 		err.AssetInventory, err.AssetID, err.ScanTimestamp, err.Inner)
 }
 
+// AssetInventoryMultipleAttributionErrors occurs when multiple attribution errors
+// occur on multiple attribution sources
+type AssetInventoryMultipleAttributionErrors struct {
+	Inner         error
+	AssetID       string
+	ScanTimestamp string
+}
+
+func (err AssetInventoryMultipleAttributionErrors) Error() string {
+	return fmt.Sprintf(
+		"Multiple asset attribution sources returned errors on asset ID %s as of scan time %s: %v",
+		err.AssetID, err.ScanTimestamp, err.Inner)
+}
+
 // AttributionFailureHandler is an interface that handles assets that could not be completely
 // attributed. The methods to implement might vary organization to organization
 type AttributionFailureHandler interface {
