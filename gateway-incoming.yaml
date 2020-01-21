@@ -95,6 +95,7 @@ paths:
               "status":
               #! if eq .Response.Body.errorType "AssetNotFoundError" !# 404,
               #! else if eq .Response.Body.errorType "AssetInventoryRequestError" !# 502,
+              #! else if eq .Response.Body.errorType "AssetInventoryMultipleAttributionErrors" !# 404,
               #! else !# 500,
               #! end !#
               "body": {
