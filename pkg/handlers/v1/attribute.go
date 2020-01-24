@@ -25,18 +25,7 @@ func (h *AttributeHandler) Handle(ctx context.Context, assetVulns domain.Nexpose
 
 	attributedAssetVulns, attributionErr := h.AssetAttributor.Attribute(ctx, assetVulns)
 	if attributionErr != nil {
-		switch attributionErr.(type) {
-		case domain.AssetNotFoundError:
-			logger.Error(logs.AssetNotFoundError{Reason: attributionErr.Error(), AssetID: assetVulns.ID})
-		case domain.AssetInventoryRequestError:
-			logger.Error(logs.AssetInventoryRequestError{Reason: attributionErr.Error(), AssetID: assetVulns.ID})
-		case domain.AssetInventoryMultipleAssetsFoundError:
-			logger.Error(logs.AssetInventoryMultipleAssetsFoundError{Reason: attributionErr.Error(), AssetID: assetVulns.ID})
-		case domain.AssetInventoryMultipleAttributionErrors:
-			logger.Error(logs.AssetInventoryMultipleAttributionErrors{Reason: attributionErr.Error(), AssetID: assetVulns.ID})
-		default:
-			logger.Error(logs.UnknownAttributionFailureError{Reason: attributionErr.Error(), AssetID: assetVulns.ID})
-		}
+		logger.Error(logs.AttributionErrorLogFactory(attributionErr, assetVulns.ID))
 		err := h.AttributionFailureHandler.HandleAttributionFailure(ctx, domain.NexposeAttributedAssetVulnerabilities{NexposeAssetVulnerabilities: assetVulns}, attributionErr)
 		if err != nil {
 			return err
@@ -46,13 +35,8 @@ func (h *AttributeHandler) Handle(ctx context.Context, assetVulns domain.Nexpose
 
 	validationErr := h.AttributedAssetValidator.Validate(ctx, attributedAssetVulns)
 	if validationErr != nil {
-		switch validationErr.(type) {
-		case domain.ValidationFailure:
-			logger.Error(logs.AssetValidationFailure{Reason: validationErr.Error(), AssetID: assetVulns.ID})
-		case domain.ValidationError:
-		default:
-			logger.Error(logs.AssetValidationError{Reason: validationErr.Error(), AssetID: assetVulns.ID})
-		}
+
+		logger.Error(logs.ValidationErrorLogFactory(validationErr, assetVulns.ID))
 
 		failureHandlerErr := h.AttributionFailureHandler.HandleAttributionFailure(ctx, attributedAssetVulns, validationErr)
 		if failureHandlerErr != nil {

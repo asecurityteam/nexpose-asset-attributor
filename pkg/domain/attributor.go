@@ -99,22 +99,20 @@ func (n *CloudAssetDetails) UnmarshalJSON(data []byte) error {
 // returns either a 404 Not Found response, or a 200 OK response with no results
 type AssetNotFoundError struct {
 	Inner          error
-	AssetID        string
 	ScanTimestamp  string
 	AssetInventory string
 }
 
 func (err AssetNotFoundError) Error() string {
 	return fmt.Sprintf(
-		"Result not found for asset with ID %s as of scan time %s in asset inventory %s: %v",
-		err.AssetID, err.ScanTimestamp, err.AssetInventory, err.Inner)
+		"Result not found for asset as of scan time %s in asset inventory %s: %v",
+		err.ScanTimestamp, err.AssetInventory, err.Inner)
 }
 
 // AssetInventoryRequestError occurs when a request to an asset inventory system
 // returns a failure response
 type AssetInventoryRequestError struct {
 	Inner          error
-	AssetID        string
 	ScanTimestamp  string
 	AssetInventory string
 	Code           int
@@ -122,37 +120,35 @@ type AssetInventoryRequestError struct {
 
 func (err AssetInventoryRequestError) Error() string {
 	return fmt.Sprintf(
-		"Request to asset inventory %s failed with code %d for asset with ID %s as of scan time %s: %v",
-		err.AssetInventory, err.Code, err.AssetID, err.ScanTimestamp, err.Inner)
+		"Request to asset inventory %s failed with code %d for asset as of scan time %s: %v",
+		err.AssetInventory, err.Code, err.ScanTimestamp, err.Inner)
 }
 
 // AssetInventoryMultipleAssetsFoundError occurs when a request to an asset inventory system
 // returns a successful response with multiple assets
 type AssetInventoryMultipleAssetsFoundError struct {
 	Inner          error
-	AssetID        string
 	ScanTimestamp  string
 	AssetInventory string
 }
 
 func (err AssetInventoryMultipleAssetsFoundError) Error() string {
 	return fmt.Sprintf(
-		"Request to asset inventory %s returned multiple values for asset with ID %s as of scan time %s: %v",
-		err.AssetInventory, err.AssetID, err.ScanTimestamp, err.Inner)
+		"Request to asset inventory %s returned multiple values for asset as of scan time %s: %v",
+		err.AssetInventory, err.ScanTimestamp, err.Inner)
 }
 
 // AssetInventoryMultipleAttributionErrors occurs when multiple attribution errors
 // occur on multiple attribution sources
 type AssetInventoryMultipleAttributionErrors struct {
 	Inner         error
-	AssetID       string
 	ScanTimestamp string
 }
 
 func (err AssetInventoryMultipleAttributionErrors) Error() string {
 	return fmt.Sprintf(
-		"Multiple asset attribution sources returned errors on asset ID %s as of scan time %s: %v",
-		err.AssetID, err.ScanTimestamp, err.Inner)
+		"Multiple asset attribution sources returned errors on asset as of scan time %s: %v",
+		err.ScanTimestamp, err.Inner)
 }
 
 // AttributionFailureHandler is an interface that handles assets that could not be completely

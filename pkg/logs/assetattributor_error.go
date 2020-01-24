@@ -1,5 +1,7 @@
 package logs
 
+import "github.com/asecurityteam/nexpose-asset-attributor/pkg/domain"
+
 // AssetNotFoundError occurs when asset attribution fails due to
 // either a 404 Not Found response or a 200 OK response with no results
 // from the queried asset inventory system(s)
@@ -40,4 +42,21 @@ type AssetInventoryMultipleAttributionErrors struct {
 	Message string `logevent:"message,default=attribution-failure"`
 	Reason  string `logevent:"reason,default=asset-could-not-attribute-on-sources"`
 	AssetID int64  `logevent:"assetID,default=id-not-specified"`
+}
+
+// AttributionErrorLogFactory is a factory function that takes an error that occurs during attribution,
+// and returns a corresponding struct with logging information
+func AttributionErrorLogFactory(attributionErr error, assetID int64) interface{} {
+	switch attributionErr.(type) {
+	case domain.AssetNotFoundError:
+		return AssetNotFoundError{Reason: attributionErr.Error(), AssetID: assetID}
+	case domain.AssetInventoryRequestError:
+		return AssetInventoryRequestError{Reason: attributionErr.Error(), AssetID: assetID}
+	case domain.AssetInventoryMultipleAssetsFoundError:
+		return AssetInventoryMultipleAssetsFoundError{Reason: attributionErr.Error(), AssetID: assetID}
+	case domain.AssetInventoryMultipleAttributionErrors:
+		return AssetInventoryMultipleAttributionErrors{Reason: attributionErr.Error(), AssetID: assetID}
+	default:
+		return UnknownAttributionFailureError{Reason: attributionErr.Error(), AssetID: assetID}
+	}
 }
