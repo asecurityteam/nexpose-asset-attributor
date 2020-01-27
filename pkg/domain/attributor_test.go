@@ -77,7 +77,7 @@ func TestCustomUnmarshallingFull(t *testing.T) {
 		},
 	}
 
-	require.True(t, reflect.DeepEqual(expected, partial), "marshalled object does not equal expected object")
+	require.True(t, reflect.DeepEqual(expected, partial), "marshaled object does not equal expected object")
 }
 
 func TestCustomUnmarshallingEmpty(t *testing.T) {
@@ -104,9 +104,9 @@ func TestCustomUnmarshallingEmpty(t *testing.T) {
 	}
 
 	// kind of a dumb test... but good enough to see
-	marshalled, _ := json.Marshal(partial)
+	marshaled, _ := json.Marshal(partial)
 	badMarshalMsg := "You've added a new field in the struct hierarchy that is type array, slice, or map, but forgot to add custom unmarshalling logic for it"
-	require.False(t, strings.Contains(string(marshalled), "null"), badMarshalMsg)
+	require.False(t, strings.Contains(string(marshaled), "null"), badMarshalMsg)
 
-	require.True(t, reflect.DeepEqual(expected, partial), "marshalled object does not equal expected object")
+	require.True(t, reflect.DeepEqual(expected, partial), "marshaled object does not equal expected object")
 }
