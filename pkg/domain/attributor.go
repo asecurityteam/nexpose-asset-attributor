@@ -104,7 +104,7 @@ type AssetNotFoundError struct {
 
 func (err AssetNotFoundError) Error() string {
 	return fmt.Sprintf(
-		"Result not found for asset asset inventory %s: %v",
+		"Result not found for asset using asset inventory %s: %v",
 		err.AssetInventory, err.Inner)
 }
 

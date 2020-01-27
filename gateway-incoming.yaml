@@ -95,13 +95,15 @@ paths:
               "status":
               #! if eq .Response.Body.errorType "AssetNotFoundError" !# 404,
               #! else if eq .Response.Body.errorType "AssetInventoryRequestError" !# 502,
-              #! else if eq .Response.Body.errorType "AssetInventoryMultipleAttributionErrors" !# 404,
+              #! else if eq .Response.Body.errorType "AssetInventoryMultipleAttributionErrors" !# 502,
               #! else !# 500,
               #! end !#
               "body": {
                 #! if eq .Response.Body.errorType "AssetNotFoundError" !#
                 "code": 404, "status": "Not Found",
                 #! else if eq .Response.Body.errorType "AssetInventoryRequestError" !#
+                "code": 502, "status": "Bad Gateway",
+                #! else if eq .Response.Body.errorType "AssetInventoryMultipleAttributionErrors" !#
                 "code": 502, "status": "Bad Gateway",
                 #! else !#
                 "code": 500, "status": "Internal Server Error",
