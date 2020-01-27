@@ -104,7 +104,7 @@ type AssetNotFoundError struct {
 }
 
 func (err AssetNotFoundError) Error() string {
-	return "Result not found for asset using asset inventory"
+	return "result not found in asset inventory"
 }
 
 // AssetInventoryRequestError occurs when a request to an asset inventory system
@@ -117,7 +117,7 @@ type AssetInventoryRequestError struct {
 }
 
 func (err AssetInventoryRequestError) Error() string {
-	return "Request to asset inventory for asset"
+	return "request to asset inventory failed"
 }
 
 // AssetInventoryMultipleAssetsFoundError occurs when a request to an asset inventory system
@@ -129,7 +129,7 @@ type AssetInventoryMultipleAssetsFoundError struct {
 }
 
 func (err AssetInventoryMultipleAssetsFoundError) Error() string {
-	return "Request to asset inventory %s returned multiple values for asset"
+	return "request to asset inventory returned multiple values for asset"
 }
 
 // AssetInventoryMultipleAttributionErrors occurs when multiple attribution errors
@@ -141,7 +141,7 @@ type AssetInventoryMultipleAttributionErrors struct {
 }
 
 func (err AssetInventoryMultipleAttributionErrors) Error() string {
-	return "Multiple asset attribution sources returned errors on asset"
+	return "multiple asset attribution sources returned errors on asset"
 }
 
 // AttributionFailureHandler is an interface that handles assets that could not be completely
