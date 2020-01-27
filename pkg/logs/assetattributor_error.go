@@ -48,15 +48,19 @@ type AssetInventoryMultipleAttributionErrors struct {
 // and returns a corresponding struct with logging information
 func AttributionErrorLogFactory(attributionErr error, assetID int64) interface{} {
 	switch attributionErr.(type) {
-	case domain.AssetNotFoundError:
-		return AssetNotFoundError{Reason: attributionErr.Error(), AssetID: assetID}
-	case domain.AssetInventoryRequestError:
-		return AssetInventoryRequestError{Reason: attributionErr.Error(), AssetID: assetID}
-	case domain.AssetInventoryMultipleAssetsFoundError:
-		return AssetInventoryMultipleAssetsFoundError{Reason: attributionErr.Error(), AssetID: assetID}
-	case domain.AssetInventoryMultipleAttributionErrors:
-		return AssetInventoryMultipleAttributionErrors{Reason: attributionErr.Error(), AssetID: assetID}
+	case *domain.AssetNotFoundError:
+		attributionErr := attributionErr.(domain.AssetNotFoundError)
+		return AssetNotFoundError{Message: attributionErr.Error(), Reason: attributionErr.Inner.Error(), AssetID: assetID}
+	case *domain.AssetInventoryRequestError:
+		attributionErr := attributionErr.(domain.AssetInventoryRequestError)
+		return AssetInventoryRequestError{Message: attributionErr.Error(), Reason: attributionErr.Inner.Error(), AssetID: assetID}
+	case *domain.AssetInventoryMultipleAssetsFoundError:
+		attributionErr := attributionErr.(domain.AssetInventoryMultipleAssetsFoundError)
+		return AssetInventoryMultipleAssetsFoundError{Message: attributionErr.Error(), Reason: attributionErr.Inner.Error(), AssetID: assetID}
+	case *domain.AssetInventoryMultipleAttributionErrors:
+		attributionErr := attributionErr.(domain.AssetInventoryMultipleAttributionErrors)
+		return AssetInventoryMultipleAttributionErrors{Message: attributionErr.Error(), Reason: attributionErr.Inner.Error(), AssetID: assetID}
 	default:
-		return UnknownAttributionFailureError{Reason: attributionErr.Error(), AssetID: assetID}
+		return UnknownAttributionFailureError{Message: attributionErr.Error(), AssetID: assetID}
 	}
 }

@@ -85,14 +85,12 @@ type CloudAssetInventory struct {
 // Attribute queries the asecurityteam/asset-inventory-api service first by IP, then by hostname
 // if the first query returns no results
 func (n *CloudAssetInventory) Attribute(ctx context.Context, asset domain.NexposeAssetVulnerabilities) (domain.NexposeAttributedAssetVulnerabilities, error) {
-	if asset.ScanTime.IsZero() {
-		return domain.NexposeAttributedAssetVulnerabilities{}, fmt.Errorf("no valid timestamp in scan history")
-	}
 
 	if asset.IP == "" && asset.Hostname == "" {
 		return domain.NexposeAttributedAssetVulnerabilities{}, domain.AssetNotFoundError{
 			Inner:          fmt.Errorf("asset has no IP or hostname"),
 			AssetInventory: cloudAssetInventoryIdentifier,
+			ScanTimestamp:  asset.ScanTime.String(),
 		}
 	}
 
@@ -140,12 +138,14 @@ func (n *CloudAssetInventory) Attribute(ctx context.Context, asset domain.Nexpos
 			return domain.NexposeAttributedAssetVulnerabilities{}, domain.AssetInventoryMultipleAssetsFoundError{
 				Inner:          e,
 				AssetInventory: cloudAssetInventoryIdentifier,
+				ScanTimestamp:  asset.ScanTime.String(),
 			}
 		case httpBadRequest:
 			return domain.NexposeAttributedAssetVulnerabilities{}, domain.AssetInventoryRequestError{
 				Inner:          e,
 				AssetInventory: cloudAssetInventoryIdentifier,
 				Code:           http.StatusBadRequest,
+				ScanTimestamp:  asset.ScanTime.String(),
 			}
 		}
 		outerErrs = append(outerErrs, e)

@@ -3,7 +3,6 @@ package domain
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	"reflect"
 	"time"
 )
@@ -100,12 +99,12 @@ func (n *CloudAssetDetails) UnmarshalJSON(data []byte) error {
 type AssetNotFoundError struct {
 	Inner          error
 	AssetInventory string
+	Code           int
+	ScanTimestamp  string
 }
 
 func (err AssetNotFoundError) Error() string {
-	return fmt.Sprintf(
-		"Result not found for asset using asset inventory %s: %v",
-		err.AssetInventory, err.Inner)
+	return "Result not found for asset using asset inventory"
 }
 
 // AssetInventoryRequestError occurs when a request to an asset inventory system
@@ -114,12 +113,11 @@ type AssetInventoryRequestError struct {
 	Inner          error
 	AssetInventory string
 	Code           int
+	ScanTimestamp  string
 }
 
 func (err AssetInventoryRequestError) Error() string {
-	return fmt.Sprintf(
-		"Request to asset inventory %s failed with code %d for asset: %v",
-		err.AssetInventory, err.Code, err.Inner)
+	return "Request to asset inventory for asset"
 }
 
 // AssetInventoryMultipleAssetsFoundError occurs when a request to an asset inventory system
@@ -127,24 +125,23 @@ func (err AssetInventoryRequestError) Error() string {
 type AssetInventoryMultipleAssetsFoundError struct {
 	Inner          error
 	AssetInventory string
+	ScanTimestamp  string
 }
 
 func (err AssetInventoryMultipleAssetsFoundError) Error() string {
-	return fmt.Sprintf(
-		"Request to asset inventory %s returned multiple values for asset: %v",
-		err.AssetInventory, err.Inner)
+	return "Request to asset inventory %s returned multiple values for asset"
 }
 
 // AssetInventoryMultipleAttributionErrors occurs when multiple attribution errors
 // occur on multiple attribution sources
 type AssetInventoryMultipleAttributionErrors struct {
-	Inner error
+	Inner          error
+	ScanTimestamp  string
+	AssetInventory string
 }
 
 func (err AssetInventoryMultipleAttributionErrors) Error() string {
-	return fmt.Sprintf(
-		"Multiple asset attribution sources returned errors on asset: %v",
-		err.Inner)
+	return "Multiple asset attribution sources returned errors on asset"
 }
 
 // AttributionFailureHandler is an interface that handles assets that could not be completely
