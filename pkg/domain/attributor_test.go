@@ -77,7 +77,7 @@ func TestCustomUnmarshallingFull(t *testing.T) {
 		},
 	}
 
-	require.True(t, reflect.DeepEqual(expected, partial), "marshalled object does not equal expected object")
+	require.True(t, reflect.DeepEqual(expected, partial), "marshaled object does not equal expected object")
 }
 
 func TestCustomUnmarshallingEmpty(t *testing.T) {
@@ -104,9 +104,45 @@ func TestCustomUnmarshallingEmpty(t *testing.T) {
 	}
 
 	// kind of a dumb test... but good enough to see
-	marshalled, _ := json.Marshal(partial)
+	marshaled, _ := json.Marshal(partial)
 	badMarshalMsg := "You've added a new field in the struct hierarchy that is type array, slice, or map, but forgot to add custom unmarshalling logic for it"
-	require.False(t, strings.Contains(string(marshalled), "null"), badMarshalMsg)
+	require.False(t, strings.Contains(string(marshaled), "null"), badMarshalMsg)
 
-	require.True(t, reflect.DeepEqual(expected, partial), "marshalled object does not equal expected object")
+	require.True(t, reflect.DeepEqual(expected, partial), "marshaled object does not equal expected object")
+}
+
+func TestErrors(t *testing.T) {
+
+	tc := []struct {
+		name           string
+		err            error
+		expectedString string
+	}{
+		{
+			name:           "AssetNotFoundError",
+			err:            &AssetNotFoundError{},
+			expectedString: "result not found in asset inventory",
+		},
+		{
+			name:           "AssetInventoryRequestError",
+			err:            &AssetInventoryRequestError{},
+			expectedString: "request to asset inventory failed",
+		},
+		{
+			name:           "AssetInventoryMultipleAssetsFoundError",
+			err:            &AssetInventoryMultipleAssetsFoundError{},
+			expectedString: "request to asset inventory returned multiple values for asset",
+		},
+		{
+			name:           "AssetInventoryMultipleAttributionErrors",
+			err:            &AssetInventoryMultipleAttributionErrors{},
+			expectedString: "multiple asset attribution sources returned errors on asset",
+		},
+	}
+
+	for _, tt := range tc {
+		t.Run(tt.name, func(t *testing.T) {
+			require.Equal(t, tt.err.Error(), tt.expectedString)
+		})
+	}
 }

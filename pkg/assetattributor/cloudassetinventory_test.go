@@ -181,7 +181,7 @@ func TestCloudAssetInventory_Attribute(t *testing.T) {
 			},
 			respCodes:   []int{http.StatusNotFound, http.StatusNotFound},
 			errExpected: true,
-			err:         domain.AssetNotFoundError{},
+			err:         domain.AssetInventoryMultipleAttributionErrors{},
 		},
 	}
 
@@ -202,27 +202,6 @@ func TestCloudAssetInventory_Attribute(t *testing.T) {
 			}
 		})
 	}
-}
-
-func TestCloudAssetInventory_Attribute_InvalidAssetTimestamp(t *testing.T) {
-	ctrl := gomock.NewController(t)
-	defer ctrl.Finish()
-	mockRT := NewMockRoundTripper(ctrl)
-	u, _ := url.Parse("http://localhost")
-
-	attributor := CloudAssetInventory{
-		Client:   &http.Client{Transport: mockRT},
-		Endpoint: u,
-	}
-
-	testAsset := domain.NexposeAssetVulnerabilities{
-		ID:       1,
-		ScanTime: time.Time{},
-		IP:       testIP,
-		Hostname: testHostname,
-	}
-	_, err := attributor.Attribute(context.Background(), testAsset)
-	require.Error(t, err)
 }
 
 func TestCloudAssetInventory_Attribute_NoHostnameOrIP(t *testing.T) {

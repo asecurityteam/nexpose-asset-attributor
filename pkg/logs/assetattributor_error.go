@@ -1,5 +1,7 @@
 package logs
 
+import "github.com/asecurityteam/nexpose-asset-attributor/pkg/domain"
+
 // AssetNotFoundError occurs when asset attribution fails due to
 // either a 404 Not Found response or a 200 OK response with no results
 // from the queried asset inventory system(s)
@@ -31,4 +33,34 @@ type UnknownAttributionFailureError struct {
 	Message string `logevent:"message,default=attribution-failure"`
 	Reason  string `logevent:"reason,default=unknown-attribution-failure"`
 	AssetID int64  `logevent:"assetID,default=id-not-specified"`
+}
+
+// AssetInventoryMultipleAttributionErrors occurs when asset attribution fails due to
+// multiple sources of attribution. This error occurs as a result of a combination of the
+// above errors
+type AssetInventoryMultipleAttributionErrors struct {
+	Message string `logevent:"message,default=attribution-failure"`
+	Reason  string `logevent:"reason,default=asset-could-not-attribute-on-sources"`
+	AssetID int64  `logevent:"assetID,default=id-not-specified"`
+}
+
+// AttributionErrorLogFactory is a factory function that takes an error that occurs during attribution,
+// and returns a corresponding struct with logging information
+func AttributionErrorLogFactory(attributionErr error, assetID int64) interface{} {
+	switch attributionErr.(type) {
+	case *domain.AssetNotFoundError:
+		attributionErr := attributionErr.(domain.AssetNotFoundError)
+		return AssetNotFoundError{Message: attributionErr.Error(), Reason: attributionErr.Inner.Error(), AssetID: assetID}
+	case *domain.AssetInventoryRequestError:
+		attributionErr := attributionErr.(domain.AssetInventoryRequestError)
+		return AssetInventoryRequestError{Message: attributionErr.Error(), Reason: attributionErr.Inner.Error(), AssetID: assetID}
+	case *domain.AssetInventoryMultipleAssetsFoundError:
+		attributionErr := attributionErr.(domain.AssetInventoryMultipleAssetsFoundError)
+		return AssetInventoryMultipleAssetsFoundError{Message: attributionErr.Error(), Reason: attributionErr.Inner.Error(), AssetID: assetID}
+	case *domain.AssetInventoryMultipleAttributionErrors:
+		attributionErr := attributionErr.(domain.AssetInventoryMultipleAttributionErrors)
+		return AssetInventoryMultipleAttributionErrors{Message: attributionErr.Error(), Reason: attributionErr.Inner.Error(), AssetID: assetID}
+	default:
+		return UnknownAttributionFailureError{Message: attributionErr.Error(), AssetID: assetID}
+	}
 }

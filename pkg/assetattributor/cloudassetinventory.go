@@ -88,13 +88,11 @@ func (n *CloudAssetInventory) Attribute(ctx context.Context, asset domain.Nexpos
 	if asset.ScanTime.IsZero() {
 		return domain.NexposeAttributedAssetVulnerabilities{}, fmt.Errorf("no valid timestamp in scan history")
 	}
-
 	if asset.IP == "" && asset.Hostname == "" {
 		return domain.NexposeAttributedAssetVulnerabilities{}, domain.AssetNotFoundError{
 			Inner:          fmt.Errorf("asset has no IP or hostname"),
-			AssetID:        fmt.Sprintf("%d", asset.ID),
-			ScanTimestamp:  asset.ScanTime.Format(time.RFC3339Nano),
 			AssetInventory: cloudAssetInventoryIdentifier,
+			ScanTimestamp:  asset.ScanTime.String(),
 		}
 	}
 
@@ -141,29 +139,24 @@ func (n *CloudAssetInventory) Attribute(ctx context.Context, asset domain.Nexpos
 		case httpMultipleAssetsFoundError:
 			return domain.NexposeAttributedAssetVulnerabilities{}, domain.AssetInventoryMultipleAssetsFoundError{
 				Inner:          e,
-				AssetID:        fmt.Sprintf("%d", asset.ID),
-				ScanTimestamp:  asset.ScanTime.Format(time.RFC3339Nano),
 				AssetInventory: cloudAssetInventoryIdentifier,
+				ScanTimestamp:  asset.ScanTime.String(),
 			}
 		case httpBadRequest:
 			return domain.NexposeAttributedAssetVulnerabilities{}, domain.AssetInventoryRequestError{
 				Inner:          e,
-				AssetID:        fmt.Sprintf("%d", asset.ID),
-				ScanTimestamp:  asset.ScanTime.Format(time.RFC3339Nano),
 				AssetInventory: cloudAssetInventoryIdentifier,
 				Code:           http.StatusBadRequest,
+				ScanTimestamp:  asset.ScanTime.String(),
 			}
 		}
 		outerErrs = append(outerErrs, e)
 	}
 
-	// Exit with an AssetNotFoundError error if both API calls returned non-fatal errors.
+	// Exit with an AssetInventoryMultipleAttributionErrors error if both API calls returned non-fatal errors.
 	if len(outerErrs) == 2 {
-		return domain.NexposeAttributedAssetVulnerabilities{}, domain.AssetNotFoundError{
-			Inner:          combinedError{Errors: outerErrs},
-			AssetID:        fmt.Sprintf("%d", asset.ID),
-			ScanTimestamp:  asset.ScanTime.Format(time.RFC3339Nano),
-			AssetInventory: cloudAssetInventoryIdentifier,
+		return domain.NexposeAttributedAssetVulnerabilities{}, domain.AssetInventoryMultipleAttributionErrors{
+			Inner: combinedError{Errors: outerErrs},
 		}
 	}
 
