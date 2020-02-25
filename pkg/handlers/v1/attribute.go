@@ -36,7 +36,7 @@ func (h *AttributeHandler) Handle(ctx context.Context, assetVulns domain.Nexpose
 	validationErr := h.AttributedAssetValidator.Validate(ctx, attributedAssetVulns)
 	if validationErr != nil {
 
-		logger.Error(logs.ValidationErrorLogFactory(validationErr, assetVulns.ID, attributedAssetVulns.BusinessContext.ARN, attributedAssetVulns.BusinessContext.ResourceType))
+		logger.Error(logs.ValidationErrorLogFactory(validationErr, assetVulns.ID, attributedAssetVulns.BusinessContext.ResourceID, attributedAssetVulns.BusinessContext.ResourceType))
 
 		failureHandlerErr := h.AttributionFailureHandler.HandleAttributionFailure(ctx, attributedAssetVulns, validationErr)
 		if failureHandlerErr != nil {

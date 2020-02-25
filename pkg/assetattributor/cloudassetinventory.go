@@ -215,7 +215,7 @@ func (n *CloudAssetInventory) fetchAsset(ctx context.Context, idType string, id 
 	if len(assetDetails.Response) > 1 {
 		foundAssets := []string{}
 		for _, assetDetail := range assetDetails.Response {
-			foundAssets = append(foundAssets, assetDetail.ARN)
+			foundAssets = append(foundAssets, assetDetail.ResourceID)
 		}
 		return []domain.CloudAssetDetails{}, httpMultipleAssetsFoundError{ID: id, Type: idType, FoundAssets: foundAssets}
 	}
