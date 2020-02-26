@@ -20,7 +20,7 @@ type AssetValidationError struct {
 
 // ValidationErrorLogFactory is a factory function that takes an error that occurs during validation,
 // and returns a corresponding struct with logging information
-func ValidationErrorLogFactory(validationErr error, assetID int64, resourceID string, resourceType string) interface{} {
+func ValidationErrorLogFactory(validationErr error, assetID int64) interface{} {
 	switch validationErr.(type) {
 	case domain.ValidationFailure:
 		return AssetValidationFailure{Reason: validationErr.Error(), AssetID: assetID}
