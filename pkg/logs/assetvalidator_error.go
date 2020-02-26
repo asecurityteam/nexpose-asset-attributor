@@ -5,11 +5,9 @@ import "github.com/asecurityteam/nexpose-asset-attributor/pkg/domain"
 // AssetValidationFailure occurs when an asset was found in an asset inventory system
 // and subsequent validation of that asset completed, but with a failure result.
 type AssetValidationFailure struct {
-	Message      string `logevent:"message,default=validation-failure"`
-	Reason       string `logevent:"reason,default=unknown-validation-failure"`
-	AssetID      int64  `logevent:"assetID,default=id-not-specified"`
-	ResourceID   string `logevent:"resourceID,default=resourceID-not-specified"`
-	ResourceType string `logevent:"resourcetype,default=unknown-resourcetype"`
+	Message string `logevent:"message,default=validation-failure"`
+	Reason  string `logevent:"reason,default=unknown-validation-failure"`
+	AssetID int64  `logevent:"assetID,default=id-not-specified"`
 }
 
 // AssetValidationError occurs when an asset was found in an asset inventory system
@@ -25,7 +23,7 @@ type AssetValidationError struct {
 func ValidationErrorLogFactory(validationErr error, assetID int64, resourceID string, resourceType string) interface{} {
 	switch validationErr.(type) {
 	case domain.ValidationFailure:
-		return AssetValidationFailure{Reason: validationErr.Error(), AssetID: assetID, ResourceID: resourceID, ResourceType: resourceType}
+		return AssetValidationFailure{Reason: validationErr.Error(), AssetID: assetID}
 	default:
 		return AssetValidationError{Reason: validationErr.Error(), AssetID: assetID}
 	}
