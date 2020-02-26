@@ -8,7 +8,7 @@ type AssetValidationFailure struct {
 	Message      string `logevent:"message,default=validation-failure"`
 	Reason       string `logevent:"reason,default=unknown-validation-failure"`
 	AssetID      int64  `logevent:"assetID,default=id-not-specified"`
-	ARN          string `logevent:"arn,default=arn-not-specified"`
+	ResourceID   string `logevent:"resourceID,default=resourceID-not-specified"`
 	ResourceType string `logevent:"resourcetype,default=unknown-resourcetype"`
 }
 
@@ -22,10 +22,10 @@ type AssetValidationError struct {
 
 // ValidationErrorLogFactory is a factory function that takes an error that occurs during validation,
 // and returns a corresponding struct with logging information
-func ValidationErrorLogFactory(validationErr error, assetID int64, arn string, resourceType string) interface{} {
+func ValidationErrorLogFactory(validationErr error, assetID int64, resourceID string, resourceType string) interface{} {
 	switch validationErr.(type) {
 	case domain.ValidationFailure:
-		return AssetValidationFailure{Reason: validationErr.Error(), AssetID: assetID, ARN: arn, ResourceType: resourceType}
+		return AssetValidationFailure{Reason: validationErr.Error(), AssetID: assetID, ResourceID: resourceID, ResourceType: resourceType}
 	default:
 		return AssetValidationError{Reason: validationErr.Error(), AssetID: assetID}
 	}

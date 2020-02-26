@@ -32,7 +32,7 @@ type CloudAssetDetails struct {
 	ResourceType       string            `json:"resourceTypes"`
 	AccountID          string            `json:"accountID"`
 	Region             string            `json:"region"`
-	ARN                string            `json:"arn"`
+	ResourceID         string            `json:"resourceID"`
 	Tags               map[string]string `json:"tags"`
 }
 
