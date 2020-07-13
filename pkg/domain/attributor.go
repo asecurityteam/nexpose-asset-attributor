@@ -21,6 +21,7 @@ type NexposeAssetVulnerabilities struct {
 	Hostname        string                      `json:"hostname"`
 	ID              int64                       `json:"id"`
 	IP              string                      `json:"ip"`
+	ScanType        string                      `json:"scanType"`
 	Vulnerabilities []AssetVulnerabilityDetails `json:"assetVulnerabilityDetails"`
 }
 

@@ -132,6 +132,7 @@ components:
         - id
         - ip
         - scanTime
+        - scanType
         - assetVulnerabilityDetails
       properties:
         id:
@@ -147,6 +148,10 @@ components:
           type: string
           format: date-time
           description: The time the asset was scanned in ISO8601 format.
+        scanType:
+          type: string
+          description: The type of scan done on the asset, remote or local.
+          enum: [local, remote]
         assetVulnerabilityDetails:
           type: array
           description: List of vulnerabilities found on the asset.
@@ -158,6 +163,7 @@ components:
         - id
         - hostname
         - scanTime
+        - scanType
         - assetVulnerabilityDetails
       properties:
         id:
@@ -173,6 +179,10 @@ components:
           type: string
           format: date-time
           description: The time the asset was scanned in ISO8601 format.
+        scanType:
+          type: string
+          description: The type of scan done on the asset, remote or local.
+          enum: [local, remote]
         assetVulnerabilityDetails:
           type: array
           description: List of vulnerabilities found on the asset.
