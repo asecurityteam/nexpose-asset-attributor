@@ -102,37 +102,7 @@ components:
           description: HTTP status code
         reason:
           type: string
-          description: Detailed information about the error
-    AssetWithVulnerabilities:
-      type: object
-      required:
-        - id
-        - ip
-        - scanTime
-        - assetVulnerabilityDetails
-      properties:
-        hostname:
-          type: string
-          example: corporate-workstation-1102DC.acme.com
-          description: The primary host name (local or FQDN) of the asset.
-        id:
-          type: integer
-          format: int64
-          example: 282
-          description: The identifier of the asset.
-        ip:
-          type: string
-          example: 182.34.74.202
-          description: The primary IPv4 or IPv6 address of the asset.
-        scanTime:
-          type: string
-          format: date-time
-          description: The time the asset was scanned in ISO8601 format.
-        assetVulnerabilityDetails:
-          type: array
-          description: List of vulnerabilities found on the asset.
-          items:
-            $ref: '#/components/schemas/AssetVulnerabilityDetails'
+          description: Detailed information about the errorho
     AssetVulnerabilityDetails:
       type: object
       required:
@@ -266,6 +236,7 @@ components:
         - id
         - ip
         - scanTime
+        - scanType
         - assetVulnerabilityDetails
       properties:
         id:
@@ -281,6 +252,10 @@ components:
           type: string
           format: date-time
           description: The time the asset was scanned in ISO8601 format.
+        scanType:
+          type: string
+          description: The type of scan done on the asset, remote or local.
+          enum: [local, remote]
         assetVulnerabilityDetails:
           type: array
           description: List of vulnerabilities found on the asset.
@@ -294,6 +269,7 @@ components:
         - id
         - hostname
         - scanTime
+        - scanType
         - assetVulnerabilityDetails
       properties:
         id:
@@ -309,6 +285,10 @@ components:
           type: string
           format: date-time
           description: The time the asset was scanned in ISO8601 format.
+        scanType:
+          type: string
+          description: The type of scan done on the asset, remote or local.
+          enum: [local, remote]
         assetVulnerabilityDetails:
           type: array
           description: List of vulnerabilities found on the asset.
