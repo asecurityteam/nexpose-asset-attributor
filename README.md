@@ -1,3 +1,6 @@
+# We no longer use Nexpose. 
+This repository is not maintained.
+
 <a id="markdown-nexpose-asset-attributor" name="nexpose-asset-attributor"></a>
 # nexpose-asset-attributor - Attribute Assets from Nexpose to Teams and People
 [![GoDoc](https://godoc.org/github.com/asecurityteam/nexpose-asset-attributor?status.svg)](https://godoc.org/github.com/asecurityteam/nexpose-asset-attributor)
